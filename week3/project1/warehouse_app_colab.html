@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warehouse Inspector</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --approve: #2ecc71;
+      --reject:  #e74c3c;
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222535;
+      --border:    #2e3147;
+      --text:      #e8e8f0;
+      --text-muted:#888aaa;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--text);
+      height: 100%; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.25s ease; }
+
+    /* ── Top bar ──────────────────────────────────────────────────────── */
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 16px; height: 52px; flex-shrink: 0;
+    }
+    .topbar-title { font-size: 16px; font-weight: 700; white-space: nowrap; margin-right: 4px; }
+    .topbar-sep { color: var(--border); font-size: 20px; margin: 0 2px; }
+    .topbar-spacer { flex: 1; }
+
+    .mode-btn {
+      padding: 6px 14px; border-radius: 6px;
+      border: 1px solid transparent; background: transparent; color: var(--text-muted);
+      font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .mode-btn:hover  { background: var(--surface2); color: var(--text); }
+    .mode-btn.active { background: var(--surface2); border-color: var(--border); color: var(--text); }
+
+    .timer-toggle-label {
+      display: flex; align-items: center; gap: 6px; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; user-select: none; white-space: nowrap;
+    }
+    .timer-toggle-label input { cursor: pointer; accent-color: #3d5afe; }
+    .timer-toggle-sub { font-size: 11px; color: var(--text-muted); }
+
+    .btn-reset {
+      padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); font-size: 13px;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s;
+    }
+    .btn-reset:hover { background: var(--surface2); color: var(--text); }
+
+    /* ── Main content ─────────────────────────────────────────────────── */
+    .main { flex: 1; overflow-y: auto; padding: 24px 32px; }
+    .main-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 200px; color: var(--text-muted); font-size: 15px;
+    }
+
+    /* ── Score bar ───────────────────────────────────────────────────── */
+    .score-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+    .score-left  { display: flex; flex-direction: column; gap: 6px; }
+    .score-right { display: flex; gap: 10px; }
+    .score-tile-info { font-size: 13px; color: var(--text-muted); }
+    .hist-dots { display: flex; gap: 5px; align-items: center; }
+    .hist-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .score-badge {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 16px; text-align: center; min-width: 80px;
+    }
+    .score-badge-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .score-badge-value { font-size: 20px; font-weight: 700; }
+    .score-badge-sub   { font-size: 11px; color: var(--text-muted); }
+
+    .challenge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .card-body { padding: 16px; }
+    .img-wrapper { position: relative; }
+    .img-wrapper img { width: 100%; display: block; }
+    .clickable-img { cursor: zoom-in; transition: filter 0.15s; }
+    .clickable-img:hover { filter: brightness(1.08); }
+
+    @keyframes timerPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+    .timer-display {
+      position: absolute; top: 10px; right: 10px; width: 44px; height: 44px;
+      border-radius: 50%; background: rgba(0,0,0,0.7); color: #fff; font-size: 20px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(255,255,255,0.3); pointer-events: none;
+    }
+    .timer-display.urgent { border-color: var(--reject); color: var(--reject); animation: timerPulse 0.5s ease infinite; }
+
+    .verdict-label { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+    .verdict-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-approve, .btn-reject {
+      padding: 12px; border-radius: 8px; border: none;
+      font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-approve { background: var(--approve); color: #fff; }
+    .btn-reject  { background: var(--reject);  color: #fff; }
+    .btn-approve:hover, .btn-reject:hover { opacity: 0.85; transform: translateY(-1px); }
+    .result-text { font-size: 15px; margin-bottom: 14px; line-height: 1.6; }
+    .btn-next {
+      width: 100%; padding: 12px; border-radius: 8px; border: none;
+      background: #3d5afe; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-next:hover { opacity: 0.85; }
+    .kbd-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    kbd {
+      display: inline-block; padding: 1px 6px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--surface2); font-size: 11px; color: var(--text);
+    }
+    .algo-verdict { margin-top: 12px; font-size: 14px; font-weight: 600; }
+    .placeholder-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; display: flex; align-items: center; justify-content: center;
+      min-height: 200px; color: var(--text-muted); font-size: 13px; text-align: center;
+    }
+
+    .cov-bar-wrapper { margin: 12px 0; }
+    .cov-bar-label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+    .cov-bar-track { position: relative; height: 14px; background: #333; border-radius: 6px; overflow: visible; }
+    .cov-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+    .cov-bar-marker { position: absolute; top: -4px; left: 40%; width: 3px; height: 22px; background: #aaa; border-radius: 2px; }
+
+    .summary { max-width: 720px; }
+    .summary-header { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 28px; }
+    .summary-score { font-size: 72px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+    .summary-sub { font-size: 15px; color: var(--text-muted); }
+    .summary-section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 14px; }
+    .summary-wrong-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 8px; }
+    .summary-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .summary-tile img { width: 100%; display: block; cursor: zoom-in; }
+    .summary-tile-info { display: flex; justify-content: space-between; padding: 8px 10px; font-size: 12px; }
+
+    .dist-chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px 12px; margin-bottom: 20px; }
+    .dist-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 12px; }
+    .dist-bars { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .dist-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 3px; }
+    .dist-bar-count { font-size: 10px; color: var(--text-muted); min-height: 14px; }
+    .dist-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 2px; }
+    .dist-bar-label { font-size: 9px; color: var(--text-muted); margin-top: 4px; }
+
+    .explorer-count { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .explorer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .tile-card { background: var(--surface); border-radius: 10px; overflow: hidden; border: 2px solid transparent; }
+    .tile-card-footer { padding: 10px 12px; }
+    .tile-status { text-align: center; font-weight: 700; font-size: 13px; margin-top: 8px; }
+
+    .img-compare { position: relative; overflow: hidden; cursor: col-resize; user-select: none; line-height: 0; }
+    .img-compare .compare-base { width: 100%; display: block; }
+    .img-compare .compare-mask { position: absolute; top: 0; left: 0; width: 100%; display: block; clip-path: inset(0 50% 0 0); pointer-events: none; }
+    .compare-handle { position: absolute; top: 0; bottom: 0; width: 3px; background: rgba(255,255,255,0.9); left: 50%; transform: translateX(-50%); cursor: col-resize; display: flex; align-items: center; justify-content: center; }
+    .compare-knob { width: 28px; height: 28px; border-radius: 50%; background: #fff; color: #333; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4); flex-shrink: 0; }
+    .compare-labels { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; }
+    .compare-label-orig, .compare-label-mask { font-size: 11px; font-weight: 600; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    #lightbox { display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; }
+    #lightbox-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.88); cursor: zoom-out; }
+    #lightbox-img { position: relative; max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); object-fit: contain; }
+
+    @media (max-width: 700px) {
+      .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 8px; }
+      .topbar-spacer { display: none; }
+      .main { padding: 16px; }
+      .challenge-grid { grid-template-columns: 1fr; }
+      .explorer-grid { grid-template-columns: repeat(2, 1fr); }
+      .summary-wrong-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .mask-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+    .mask-pair figure { margin: 0; }
+    .mask-pair img { width: 100%; border-radius: 6px; display: block; cursor: zoom-in; }
+    .mask-pair figcaption { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px; }
+    .explorer-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="topbar-title">&#127981; Warehouse Inspector</div>
+    <div class="topbar-sep">|</div>
+    <button class="mode-btn active" id="btn-challenge">Challenge</button>
+    <button class="mode-btn" id="btn-explorer">Explorer</button>
+    <div class="topbar-spacer"></div>
+    <div id="timer-section">
+      <label class="timer-toggle-label">
+        <input type="checkbox" id="timer-toggle-cb">
+        Timed <span class="timer-toggle-sub">(8s)</span>
+      </label>
+    </div>
+    <button class="btn-reset" id="btn-reset">Reset score</button>
+  </nav>
+
+  <main class="main">
+    <h1 class="main-title" id="main-title">Challenge Mode</h1>
+    <div id="main-content">
+      <div class="loading">Loading tiles&hellip;</div>
+    </div>
+  </main>
+
+  <div id="lightbox">
+    <div id="lightbox-backdrop"></div>
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
+  <script>
+    'use strict';
+
+    const APPROVE_COLOR = '#2ecc71';
+    const REJECT_COLOR  = '#e74c3c';
+    const TIMER_SECONDS = 8;
+    const HISTORY_MAX   = 10;
+    const EXPLORER_MAX  = 12;
+
+    const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%231a1d27'/%3E%3Ctext x='50%25' y='50%25' fill='%23555' font-size='13' text-anchor='middle' dy='.3em'%3ELoading%E2%80%A6%3C/text%3E%3C/svg%3E";
+
+    let tiles     = [];
+    let THRESHOLD = 0.85;   // replaced by the value sent from Python
+    let mode      = 'challenge';
+    let timedMode = false;
+    let timerId   = null;
+    let timerLeft = TIMER_SECONDS;
+
+    const challenge = {
+      seenIndices: new Set(),
+      modelCorrect: 0,
+      current:     null,
+      revealed:    false,
+      userChoice:  null,
+      score:       { correct: 0, total: 0 },
+      streak:      0,
+      bestStreak:  0,
+      history:     [],
+      answers:     [],
+      gameOver:    false,
+    };
+
+    // ── Colab bridge ─────────────────────────────────────────────────────
+    async function callPython(name, args) {
+      const result = await google.colab.kernel.invokeFunction(name, args, {});
+      // Callbacks return IPython.display.JSON, so no string un-quoting is needed
+      if (result.data["application/json"]) return result.data["application/json"];
+      let raw = result.data["text/plain"];
+      if (raw.startsWith("'") && raw.endsWith("'")) raw = raw.slice(1, -1);
+      return JSON.parse(raw);
+    }
+
+    async function getImageSrc(filename, imageType) {
+      const data = await callPython('getImage', [filename, imageType]);
+      return 'data:' + (data.mime || 'image/jpeg') + ';base64,' + data.image;
+    }
+
+    function fillImages(container) {
+      Array.from(container.querySelectorAll('img[data-filename]')).forEach(async img => {
+        try {
+          img.src = await getImageSrc(img.dataset.filename, img.dataset.type);
+        } catch (e) { console.warn('Image load failed:', img.dataset.filename, e); }
+      });
+    }
+
+    // ── Bootstrap ─────────────────────────────────────────────────────────
+    async function init() {
+      const payload = await callPython('getTiles', []);
+      THRESHOLD = payload.threshold;
+      tiles = payload.tiles;
+
+      challenge.current = pickRandom(tiles, challenge.seenIndices);
+      challenge.seenIndices.add(challenge.current.index);
+
+      document.getElementById('btn-challenge').addEventListener('click', () => switchMode('challenge'));
+      document.getElementById('btn-explorer').addEventListener('click',  () => switchMode('explorer'));
+      document.getElementById('btn-reset').addEventListener('click', resetChallenge);
+      document.getElementById('timer-toggle-cb').addEventListener('change', e => {
+        timedMode = e.target.checked;
+        if (!timedMode) stopTimer();
+        else if (mode === 'challenge' && !challenge.revealed && !challenge.gameOver) startTimer();
+      });
+      document.getElementById('lightbox-backdrop').addEventListener('click', closeLightbox);
+      document.addEventListener('keydown', onKeydown);
+      render();
+    }
+
+    if (!(window.google && google.colab && google.colab.kernel)) {
+      // Saved notebook viewed outside Colab (GitHub, VS Code, nbconvert): the game needs a live kernel.
+      document.getElementById('main-content').innerHTML =
+        '<div style="padding:24px;color:var(--text-muted);line-height:1.6">🎮 This game runs live in Google Colab: it asks the Python kernel for tiles and predictions.<br>' +
+        'Re-run the cell in Colab to play — in a saved copy of the notebook it has nothing to talk to.</div>';
+    } else init().catch(e => {
+      document.getElementById('main-content').innerHTML =
+        '<div style="color:#e74c3c;padding:24px;font-family:monospace">Failed to load tiles: ' + e +
+        '<br><br><small>Make sure you ran the Python cells above before this cell.</small></div>';
+    });
+
+    // ── Keyboard ──────────────────────────────────────────────────────────
+    function onKeydown(e) {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'Escape') { closeLightbox(); return; }
+      if (mode !== 'challenge' || challenge.gameOver) return;
+      if (!challenge.revealed) {
+        if (e.key === 'a' || e.key === 'A') handleChoice('APPROVE');
+        if (e.key === 'r' || e.key === 'R') handleChoice('REJECT');
+      } else {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleNext(); }
+      }
+    }
+
+    // ── Lightbox ──────────────────────────────────────────────────────────
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').style.display = 'flex';
+    }
+    function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
+    function attachLightbox(container) {
+      container.querySelectorAll('.clickable-img').forEach(img => {
+        img.addEventListener('click', () => { if (img.src !== PLACEHOLDER) openLightbox(img.src); });
+      });
+    }
+
+    // ── Timer ─────────────────────────────────────────────────────────────
+    function startTimer() {
+      stopTimer(); timerLeft = TIMER_SECONDS; tickTimer();
+      timerId = setInterval(tickTimer, 1000);
+    }
+    function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+    function tickTimer() {
+      const el = document.getElementById('timer-display');
+      if (el) { el.textContent = timerLeft; el.classList.toggle('urgent', timerLeft <= 3); }
+      if (timerLeft <= 0) {
+        stopTimer();
+        handleChoice(challenge.current.true_status === 'APPROVE' ? 'REJECT' : 'APPROVE', true);
+        return;
+      }
+      timerLeft--;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+    function pickRandom(pool, seen) {
+      const avail = pool.filter(t => !seen.has(t.index));
+      const src   = avail.length > 0 ? avail : pool;
+      return src[Math.floor(Math.random() * src.length)];
+    }
+
+    function coverageBarHTML(pct, label = 'Usable') {
+      const color = pct >= THRESHOLD ? APPROVE_COLOR : REJECT_COLOR;
+      return `<div class="cov-bar-wrapper">
+        <div class="cov-bar-label">${label}: <strong style="color:${color}">${(pct*100).toFixed(1)}%</strong> &middot; threshold: ${Math.round(THRESHOLD * 100)}%</div>
+        <div class="cov-bar-track">
+          <div class="cov-bar-fill" data-target="${Math.round(pct*100)}" style="width:0;background:${color}"></div>
+          <div class="cov-bar-marker"></div>
+        </div></div>`;
+    }
+
+    function animateBars() {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.querySelectorAll('.cov-bar-fill[data-target]').forEach(el => {
+          el.style.width = el.dataset.target + '%';
+        });
+      }));
+    }
+
+    // ── Mode switching ────────────────────────────────────────────────────
+    function switchMode(newMode) { stopTimer(); mode = newMode; render(); }
+
+    function render() {
+      document.getElementById('btn-challenge').classList.toggle('active', mode === 'challenge');
+      document.getElementById('btn-explorer').classList.toggle('active',  mode === 'explorer');
+      document.getElementById('btn-reset').style.display     = mode === 'challenge' ? '' : 'none';
+      document.getElementById('timer-section').style.display = mode === 'challenge' ? '' : 'none';
+      if (mode === 'challenge') {
+        document.getElementById('main-title').textContent = 'Challenge Mode';
+        renderChallenge();
+      } else {
+        document.getElementById('main-title').textContent = 'Explorer Mode';
+        renderExplorer();
+      }
+    }
+
+    // ── Challenge ─────────────────────────────────────────────────────────
+    function renderChallenge() {
+      if (challenge.gameOver) { renderSummary(); return; }
+      const t  = challenge.current;
+      const sc = challenge.score;
+      const pct = sc.total > 0 ? `${Math.round(sc.correct/sc.total*100)}%` : '—';
+      const histDots = challenge.history.slice(-HISTORY_MAX)
+        .map(c => `<span class="hist-dot" style="background:${c ? APPROVE_COLOR : REJECT_COLOR}"></span>`).join('');
+      const timerBadge = (timedMode && !challenge.revealed)
+        ? `<div class="timer-display" id="timer-display">${timerLeft}</div>` : '';
+
+      const content = document.getElementById('main-content');
+      content.innerHTML = `
+        <div class="score-bar fade-in">
+          <div class="score-left">
+            <span class="score-tile-info">Test tile ${challenge.seenIndices.size} of ${tiles.length}</span>
+            <div class="hist-dots">${histDots}</div>
+          </div>
+          <div class="score-right">
+            <div class="score-badge">
+              <div class="score-badge-label">You</div>
+              <div class="score-badge-value">${pct}</div>
+              <div class="score-badge-sub">${sc.correct} / ${sc.total}</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-badge-label">Model</div>
+              <div class="score-badge-value">${sc.total > 0 ? Math.round(challenge.modelCorrect/sc.total*100) + '%' : '—'}</div>
+              <div class="score-badge-sub">${challenge.modelCorrect} / ${sc.total}</div>
+            </div>
+            <div class="score-badge">
+              <div class="score-badge-label">Streak</div>
+              <div class="score-badge-value">${challenge.streak}</div>
+              <div class="score-badge-sub">best ${challenge.bestStreak}</div>
+            </div>
+          </div>
+        </div>
+        <div class="challenge-grid fade-in">
+          <div class="card">
+            <div class="img-wrapper">
+              <img class="clickable-img" src="${PLACEHOLDER}" data-filename="${t.filename}" data-type="original" alt="tile">
+              ${timerBadge}
+            </div>
+            <div class="card-body">
+              ${!challenge.revealed
+                ? `<div class="kbd-hint">Press <kbd>A</kbd> Approve &nbsp; <kbd>R</kbd> Reject</div>`
+                : `<div class="kbd-hint">Press <kbd>Space</kbd> for next tile</div>`}
+              ${verdictAreaHTML(t)}
+            </div>
+          </div>
+          <div id="right-panel">${rightPanelHTML(t)}</div>
+        </div>`;
+
+      attachLightbox(content);
+      fillImages(content);
+
+      if (!challenge.revealed) {
+        document.getElementById('btn-approve').addEventListener('click', () => handleChoice('APPROVE'));
+        document.getElementById('btn-reject').addEventListener('click',  () => handleChoice('REJECT'));
+        if (timedMode) startTimer();
+      } else {
+        document.getElementById('btn-next').addEventListener('click', handleNext);
+        animateBars();
+      }
+    }
+
+    function verdictAreaHTML(t) {
+      if (!challenge.revealed) return `
+        <div class="verdict-label">What's your verdict?</div>
+        <div class="verdict-btns">
+          <button class="btn-approve" id="btn-approve">APPROVE</button>
+          <button class="btn-reject"  id="btn-reject">REJECT</button>
+        </div>`;
+      const correct = challenge.userChoice === t.true_status;
+      const color   = challenge.userChoice === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+      return `
+        <div class="result-text fade-in">You chose: <strong style="color:${color}">${challenge.userChoice}</strong> &mdash; ${correct ? 'Correct!' : 'Wrong!'}</div>
+        <button class="btn-next" id="btn-next">Next Tile &rarr;</button>`;
+    }
+
+    function rightPanelHTML(t) {
+      if (!challenge.revealed) return `<div class="placeholder-panel">Make your decision &mdash; the mask will be revealed after you choose.</div>`;
+      const trueColor  = t.true_status  === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+      const modelColor = t.model_status === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+      const modelOk    = t.model_status === t.true_status;
+      return `
+        <div class="card fade-in">
+          <div class="mask-pair">
+            <figure><img class="clickable-img" src="${PLACEHOLDER}" data-filename="${t.filename}" data-type="truth" alt="true mask"><figcaption>Ground truth</figcaption></figure>
+            <figure><img class="clickable-img" src="${PLACEHOLDER}" data-filename="${t.filename}" data-type="errors" alt="model errors"><figcaption>Model errors (red = missed damage, blue = good surface wasted)</figcaption></figure>
+          </div>
+          <div class="card-body">
+            ${coverageBarHTML(t.true_usable, 'True usable share')}
+            ${coverageBarHTML(t.model_usable, 'Model usable share')}
+            <div class="algo-verdict">Truth: <span style="color:${trueColor}">${t.true_status}</span>
+              &nbsp;&middot;&nbsp; Model: <span style="color:${modelColor}">${t.model_status}</span> ${modelOk ? '&#10003;' : '&#10007;'}</div>
+          </div>
+        </div>`;
+    }
+
+    function handleChoice(choice, timedOut = false) {
+      stopTimer();
+      const correct = choice === challenge.current.true_status;
+      challenge.modelCorrect += challenge.current.model_status === challenge.current.true_status ? 1 : 0;
+      challenge.userChoice  = choice;
+      challenge.revealed    = true;
+      challenge.score.correct += correct ? 1 : 0;
+      challenge.score.total   += 1;
+      challenge.streak      = correct ? challenge.streak + 1 : 0;
+      challenge.bestStreak  = Math.max(challenge.bestStreak, challenge.streak);
+      challenge.history.push(correct);
+      challenge.answers.push({ tile: challenge.current, userChoice: choice, correct, timedOut });
+      renderChallenge();
+    }
+
+    function handleNext() {
+      if (challenge.seenIndices.size >= tiles.length) { challenge.gameOver = true; renderChallenge(); return; }
+      const next = pickRandom(tiles, challenge.seenIndices);
+      challenge.seenIndices.add(next.index);
+      challenge.current    = next;
+      challenge.revealed   = false;
+      challenge.userChoice = null;
+      renderChallenge();
+    }
+
+    function resetChallenge() {
+      stopTimer();
+      challenge.seenIndices = new Set();
+      challenge.current     = pickRandom(tiles, challenge.seenIndices);
+      challenge.seenIndices.add(challenge.current.index);
+      challenge.revealed = false; challenge.userChoice = null;
+      challenge.score    = { correct: 0, total: 0 };
+      challenge.modelCorrect = 0;
+      challenge.streak   = 0; challenge.bestStreak = 0;
+      challenge.history  = []; challenge.answers = []; challenge.gameOver = false;
+      renderChallenge();
+    }
+
+    // ── Summary ───────────────────────────────────────────────────────────
+    function renderSummary() {
+      const sc  = challenge.score;
+      const pct = sc.total > 0 ? Math.round(sc.correct/sc.total*100) : 0;
+      const modelPct = sc.total > 0 ? Math.round(challenge.modelCorrect/sc.total*100) : 0;
+      const wrong = challenge.answers.filter(a => !a.correct);
+      const wrongGrid = wrong.length === 0
+        ? `<p style="color:var(--text-muted);font-size:14px">No mistakes — perfect round!</p>`
+        : wrong.slice(0, 6).map(a => {
+            const ac = a.tile.true_status === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+            const uc = a.userChoice  === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+            return `<div class="summary-tile">
+              <img class="clickable-img" src="${PLACEHOLDER}" data-filename="${a.tile.filename}" data-type="original" alt="">
+              <div class="summary-tile-info">
+                <span>You: <strong style="color:${uc}">${a.userChoice}</strong></span>
+                <span>Truth: <strong style="color:${ac}">${a.tile.true_status}</strong></span>
+                <span>Model: <strong>${a.tile.model_status}</strong></span>
+                ${a.timedOut ? '<span style="color:var(--text-muted);font-size:11px">Timed out</span>' : ''}
+              </div></div>`;
+          }).join('');
+
+      const content = document.getElementById('main-content');
+      content.innerHTML = `
+        <div class="summary fade-in">
+          <div class="summary-header">
+            <div class="summary-score">${pct}%</div>
+            <div class="summary-sub">${sc.correct} of ${sc.total} correct &nbsp;&middot;&nbsp; Best streak: ${challenge.bestStreak}
+              &nbsp;&middot;&nbsp; The model got <strong>${modelPct}%</strong> of the same tiles right</div>
+          </div>
+          ${wrong.length > 0 ? `<div class="summary-section-title">Tiles you got wrong (${wrong.length})</div><div class="summary-wrong-grid">${wrongGrid}</div>` : wrongGrid}
+          <button class="btn-next" id="btn-play-again" style="max-width:220px;margin-top:24px">Play Again</button>
+        </div>`;
+      document.getElementById('btn-play-again').addEventListener('click', resetChallenge);
+      attachLightbox(content);
+      fillImages(content);
+    }
+
+    // ── Explorer ──────────────────────────────────────────────────────────
+    function renderExplorer() {
+      document.getElementById('main-content').innerHTML = `<div id="dist-chart"></div>
+        <div class="explorer-filters">
+          <button class="mode-btn active" data-filter="all">All</button>
+          <button class="mode-btn" data-filter="wrong">Model mistakes</button>
+          <button class="mode-btn" data-filter="border">Borderline (&plusmn;5 points)</button>
+          <button class="mode-btn" id="btn-shuffle">Shuffle</button>
+        </div><div id="explorer-results"></div>`;
+      document.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => {
+        document.querySelectorAll('[data-filter]').forEach(x => x.classList.remove('active'));
+        b.classList.add('active'); explorerFilter = b.dataset.filter; explorerOffset = 0; updateExplorer();
+      }));
+      document.getElementById('btn-shuffle').addEventListener('click', () => { explorerOffset += EXPLORER_MAX; updateExplorer(); });
+      updateExplorer();
+    }
+
+    let explorerFilter = 'all', explorerOffset = 0;
+    function updateExplorer() {
+      const pool = tiles.filter(t => explorerFilter === 'all'
+        || (explorerFilter === 'wrong' && t.model_status !== t.true_status)
+        || (explorerFilter === 'border' && Math.abs(t.true_usable - THRESHOLD) < 0.05));
+      const start = pool.length ? explorerOffset % pool.length : 0;
+      const shown = pool.slice(start, start + EXPLORER_MAX);
+      renderDistChart(tiles);
+      const resultsEl = document.getElementById('explorer-results');
+      resultsEl.innerHTML = `
+        <div class="explorer-count">Showing ${shown.length} of ${pool.length} test tiles &middot; drag the handle to compare photo and model mask</div>
+        <div class="explorer-grid">${shown.map(tileCardHTML).join('')}</div>`;
+      shown.forEach(t => initCompareSlider(t.index));
+      animateBars();
+      fillImages(resultsEl);
+    }
+
+    function renderDistChart(data) {
+      const buckets = Array(10).fill(0);
+      data.forEach(t => { buckets[Math.min(9, Math.floor(t.true_usable * 10))]++; });
+      const maxCount = Math.max(...buckets, 1);
+      const bars = buckets.map((count, i) => {
+        const color = (i + 1) / 10 > THRESHOLD ? APPROVE_COLOR : REJECT_COLOR;
+        const h     = Math.round(count / maxCount * 100);
+        return `<div class="dist-bar-col">
+          <div class="dist-bar-count">${count || ''}</div>
+          <div class="dist-bar" style="height:${h}%;background:${color}"></div>
+          <div class="dist-bar-label">${i * 10}</div></div>`;
+      }).join('');
+      document.getElementById('dist-chart').innerHTML = `
+        <div class="dist-chart fade-in">
+          <div class="dist-title">True usable share of the test tiles (%)</div>
+          <div class="dist-bars">${bars}</div>
+        </div>`;
+    }
+
+    function tileCardHTML(t) {
+      const bc = t.true_status === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+      const mc = t.model_status === 'APPROVE' ? APPROVE_COLOR : REJECT_COLOR;
+      return `<div class="tile-card" style="border-color:${bc}">
+        <div class="img-compare" id="compare-${t.index}">
+          <img class="compare-base" src="${PLACEHOLDER}" data-filename="${t.filename}" data-type="original" draggable="false" alt="">
+          <img class="compare-mask" id="mask-${t.index}" src="${PLACEHOLDER}" data-filename="${t.filename}" data-type="prediction" draggable="false" alt="">
+          <div class="compare-handle" id="handle-${t.index}"><div class="compare-knob">&#8596;</div></div>
+          <div class="compare-labels">
+            <span class="compare-label-orig">Model mask</span>
+            <span class="compare-label-mask">Photo</span>
+          </div>
+        </div>
+        <div class="tile-card-footer">
+          ${coverageBarHTML(t.true_usable, 'True')}
+          ${coverageBarHTML(t.model_usable, 'Model')}
+          <div class="tile-status"><span style="color:${bc}">${t.true_status}</span>
+            <span style="color:var(--text-muted);font-weight:400"> &middot; model </span><span style="color:${mc}">${t.model_status}</span></div>
+        </div></div>`;
+    }
+
+    function initCompareSlider(index) {
+      const container = document.getElementById(`compare-${index}`);
+      const maskImg   = document.getElementById(`mask-${index}`);
+      const handle    = document.getElementById(`handle-${index}`);
+      if (!container || !maskImg || !handle) return;
+      let dragging = false;
+      function setPos(clientX) {
+        const rect = container.getBoundingClientRect();
+        let pct = Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width));
+        maskImg.style.clipPath = `inset(0 ${((1 - pct) * 100).toFixed(1)}% 0 0)`;
+        handle.style.left      = `${(pct * 100).toFixed(1)}%`;
+      }
+      handle.addEventListener('mousedown', e => {
+        dragging = true; e.preventDefault();
+        const mm = e2 => { if (dragging) setPos(e2.clientX); };
+        const mu = ()  => { dragging = false; document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); };
+        document.addEventListener('mousemove', mm);
+        document.addEventListener('mouseup', mu);
+      });
+      handle.addEventListener('touchstart', () => {
+        dragging = true;
+        const tm = e2 => { e2.preventDefault(); if (dragging) setPos(e2.touches[0].clientX); };
+        const tu = ()  => { dragging = false; document.removeEventListener('touchmove', tm); document.removeEventListener('touchend', tu); };
+        document.addEventListener('touchmove', tm, { passive: false });
+        document.addEventListener('touchend', tu);
+      });
+    }
+  </script>
+</body>
+</html>

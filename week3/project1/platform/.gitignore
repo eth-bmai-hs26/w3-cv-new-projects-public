@@ -1,0 +1,18 @@
+# runtime data: database, stored photos, generated placeholder tiles
+var/
+*.db
+*.db-shm
+*.db-wal
+uploads/
+# models: the shipped default model is committed on purpose; student uploads are not
+models/uploads/
+# frontend dependencies (frontend/dist is committed: the platform runs without Node.js)
+frontend/node_modules/
+# python
+__pycache__/
+.pytest_cache/
+.venv/
+frontend/*.tsbuildinfo
+
+# the shipped default model (every other *.pt stays ignored)
+!models/default_model.pt

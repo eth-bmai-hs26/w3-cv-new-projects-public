@@ -1,0 +1,11 @@
+{
+ "name": "ResNet-18 U-Net (course staff)",
+ "version": "2026-09-28",
+ "trained_on": "week3/project1/dataset_new \u2014 3 500 training tiles, solution notebook on a Colab T4",
+ "metrics": {
+  "test_accuracy_pct": 98.5,
+  "mean_iou": 0.958,
+  "damaged_iou": 0.903,
+  "usable_share_error_pp": 0.92
+ }
+}
