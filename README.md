@@ -9,7 +9,7 @@ warehouse's inspection platform on your own laptop.
 
 | | |
 |---|---|
-| 📓 **The notebook** | [open `week3/project1/notebook.ipynb` in Colab](https://colab.research.google.com/github/eth-bmai-hs26/we-cv-new-projects-public/blob/main/week3/project1/notebook.ipynb) (choose a GPU runtime) |
+| 📓 **The notebook** | [open `week3/project1/notebook.ipynb` in Colab](https://colab.research.google.com/github/eth-bmai-hs26/w3-cv-new-projects-public/blob/main/week3/project1/notebook.ipynb) (choose a GPU runtime) |
 | 🏭 **The platform** | Windows: double-click `week3/project1/platform/start-windows.bat` · macOS: `start-mac.command` · Linux: `./run.sh` |
 | 🖼️ **The slides** | [`week3/project1/slides/warehouse_inspector_slides.pdf`](week3/project1/slides/warehouse_inspector_slides.pdf) |
 

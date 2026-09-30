@@ -79,11 +79,11 @@ week3/project1/
 ### A. The notebook in Colab
 
 1. **Open the notebook in Colab:**
-   `https://colab.research.google.com/github/eth-bmai-hs26/we-cv-new-projects-public/blob/main/week3/project1/notebook.ipynb`
-   (or *File → Open notebook → GitHub*, search for `eth-bmai-hs26/we-cv-new-projects-public` and pick `week3/project1/notebook.ipynb`).
+   `https://colab.research.google.com/github/eth-bmai-hs26/w3-cv-new-projects-public/blob/main/week3/project1/notebook.ipynb`
+   (or *File → Open notebook → GitHub*, search for `eth-bmai-hs26/w3-cv-new-projects-public` and pick `week3/project1/notebook.ipynb`).
 2. **Choose a GPU.** *Runtime → Change runtime type → GPU*. With Colab Pro pick **L4** or **A100** and turn on **High-RAM**.
 3. **Run the cells from the top.** The first cell clones the project and the second shows the inspection line you are building. §1 asks where to save your work: tick **Save to Drive** so your models survive a runtime restart.
-4. **Work through the TODO cells** (11 of them). Every section ends with a live panel that tells you how well you did.
+4. **Work through the 11 tasks.** Each one has a **🎯 Task N** heading, and every line you fill in is marked `# 🎯 TODO`; the table *Your tasks at a glance* at the top lists them all. Every section ends with a live panel that tells you how well you did.
 5. **§11 exports your best model** as `platform_model.pt` and downloads it. You will load that file into the platform (part B).
 
 Cells that only do plumbing (cloning, imports, drawing the panels, downloads) are collapsed into Colab **forms**. Press ▶ to run one; click *Show code* if you are curious. Everything you need to understand or write stays visible.
@@ -92,7 +92,7 @@ Cells that only do plumbing (cloning, imports, drawing the panels, downloads) ar
 
 The platform runs **on your own computer**, not in Colab. You need **Python 3.10 or newer** ([python.org](https://www.python.org/downloads/)) and an internet connection the first time. Node.js is **not** needed, because the web interface ships pre-built.
 
-Get the project folder onto your laptop: `git clone https://github.com/eth-bmai-hs26/we-cv-new-projects-public.git`, or download it as a ZIP from GitHub (*Code → Download ZIP*) and unzip it. Then:
+Get the project folder onto your laptop: `git clone https://github.com/eth-bmai-hs26/w3-cv-new-projects-public.git`, or download it as a ZIP from GitHub (*Code → Download ZIP*) and unzip it. Then:
 
 | System | Start it |
 |---|---|
@@ -124,19 +124,19 @@ Each section answers one question and hands its answer to the next. The notebook
 | § | Section | What students do | Why |
 |---|---|---|---|
 | 1 | 🗂️ Setup | pick a GPU and a storage place; meet Dice loss and **the metrics** (§1.2) | know what "good" will mean before training anything |
-| 2 | 🔍 Dataset | ✏️ write a `Dataset` that returns (photo, class map, label); check it against the reference; cache 5 000 tiles in memory; make train/val/test splits (3 500 / 750 / 750) | a model is only as good as the data pipeline feeding it |
-| 3 | 🧱 First U-Net | ✏️ build a small U-Net (`encode` / `decode` on `LatentUNetBase`) and ✏️ its training loop | segmentation plus the 85 % rule is already a complete inspector |
-| 4 | 🔢 FNN head | ✏️ classify APPROVE/REJECT from the **pooled** bottleneck vector | can the latent space alone decide? |
-| 5 | 🧠 CNN head | ✏️ classify from the **spatial** bottleneck map | *where* the damage is matters, and pooling threw it away |
+| 2 | 🔍 Dataset | 🎯 write a `Dataset` that returns (photo, class map, label); check it against the reference; cache 5 000 tiles in memory; make train/val/test splits (3 500 / 750 / 750) | a model is only as good as the data pipeline feeding it |
+| 3 | 🧱 First U-Net | 🎯 build a small U-Net (`encode` / `decode` on `LatentUNetBase`) and 🎯 its training loop | segmentation plus the 85 % rule is already a complete inspector |
+| 4 | 🔢 FNN head | 🎯 classify APPROVE/REJECT from the **pooled** bottleneck vector | can the latent space alone decide? |
+| 5 | 🧠 CNN head | 🎯 classify from the **spatial** bottleneck map | *where* the damage is matters, and pooling threw it away |
 | 6 | ⚖️ Evaluation | scoreboard against targets, clickable confusion matrix, error inspector | find *which* tiles fail and why |
 | 7 | 🚀 One tile end to end | follow one photo through the pipeline card; play **you vs. the model** (§7b) | see what the numbers mean on a single tile |
 | 8 | 🔭 Receptive field | measure theoretical and effective receptive fields; train `DepthUNet` with depth 2/3/4 | the basic model confuses cracks with stains because it sees too little context |
-| 9 | 🏆 Challenge | ✏️ `ImprovedUNet`, ✏️ improved FNN and CNN heads, ✏️ a new **usable-share regressor**; final scoreboard; **business cost** of false approvals vs. false rejections | beat every target and choose a threshold that makes business sense |
-| 10 | 🎁 Bonus: transfer learning | ✏️ the decoder of a U-Net on an **ImageNet-pretrained ResNet-18** encoder (frozen, then fine-tuned) | the best model with the least training |
+| 9 | 🏆 Challenge | 🎯 `ImprovedUNet`, 🎯 improved FNN and CNN heads, 🎯 a new **usable-share regressor**; final scoreboard; **business cost** of false approvals vs. false rejections | beat every target and choose a threshold that makes business sense |
+| 10 | 🎁 Bonus: transfer learning | 🎯 the decoder of a U-Net on an **ImageNet-pretrained ResNet-18** encoder (frozen, then fine-tuned) | the best model with the least training |
 | 11 | 🏭 Deploy | export the best model (TorchScript) and download it | from experiment to product |
 | 12 | 📌 Takeaways | the journey from 86 % to 98.5 %, and what each step taught | |
 
-✏️ = a TODO cell (11 in total).
+🎯 = one of the 11 tasks (TODO cells).
 
 **Interactive panels** (all in `widgets.py`) are plain HTML/SVG/JS with the data embedded. They work in Colab (including Safari), JupyterLab and VS Code, and they stay visible in a saved notebook:
 
