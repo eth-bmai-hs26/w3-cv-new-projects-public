@@ -7,7 +7,7 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds,decorations.pathreplacing}
 \usepackage[most]{tcolorbox}
 \usepackage{fontawesome}   % v4 icons (fontawesome5 crashes tectonic's XeTeX)
 \graphicspath{{figures/}}
@@ -63,7 +63,14 @@
   sub/.style={font=\tiny\mdseries},
   arr/.style={-{Stealth[length=5pt]}, line width=0.7pt, color=#1},
   arr/.default=muted,
+  chip/.style={box=#1, minimum width=3.3cm, inner ysep=3.5pt, text height=1.7ex, text depth=0.45ex},
+  step/.style={draw=#1Line, fill=#1BG, rounded corners=5pt, line width=0.7pt, text width=2.72cm,
+               minimum height=1.5cm, align=left, inner sep=6pt, font=\scriptsize},
+  tag/.style={fill=#1T, text=white, rounded corners=2pt, font=\tiny\bfseries, inner sep=2.2pt, anchor=center, xshift=-0.55cm},
 }
+% roadmap step text: \stephead{section}{title}{colour}, \stepq{question}
+\newcommand{\stephead}[3]{{\color{muted}\S\,#1}\\[1pt]{\small\bfseries\color{#3T}#2}\\[1pt]}
+\newcommand{\stepq}[1]{{\color{grayT}#1}}
 \newcommand{\sw}[1]{\tikz[baseline=-0.6ex]\draw[black!40, fill=#1] (0,-0.13) rectangle (0.3,0.13);}
 \newcommand{\bignum}[3]{\begin{minipage}[t]{#1}\centering{\fontsize{30}{32}\selectfont\bfseries #2}\\[3pt]{\small\color{muted}#3}\end{minipage}}
 \newcommand{\shot}[2]{\tikz\node[inner sep=0pt, draw=rulegray, line width=0.8pt, rounded corners=2pt]{\includegraphics[#1]{#2}};}
@@ -85,26 +92,53 @@
 \end{frame}}
 
 % ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{Drop your job: you are inspectors now}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{inspector.pdf}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      {\large\bfseries As of today, you work at a\\ recycling warehouse.}\\[0.8em]
+      Whatever you were doing before, leave it. Your new job is \textbf{tile inspector}:
+      look at every reclaimed tile and decide whether it can be \textbf{sold} or must be \textbf{recycled}.
+
+      \vspace{0.8em}
+      \panel{orange}{The catch}{Thousands of tiles arrive every day. You cannot check them all by eye,
+        so you will build a model that does it for you.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{What the Warehouse Inspector is}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \vspace{0.6em}
-      \panel{orange}{The problem}{A recycling warehouse receives reclaimed floor tiles \textbf{by the thousand}.
-        Today a person checks every one: is it cracked, chipped, still sellable? It is slow, tiring
-        and two inspectors rarely agree on the borderline tiles.}
-      \vspace{0.4em}
-      \panel{green}{What we built}{An \textbf{inspection station}: each tile rides a conveyor under a camera, a
-        \textbf{U-Net} marks the usable surface, and the station decides \textbf{sell or recycle}.
-        People only see the tiles the model is unsure about.}
+  \begin{columns}[c]
+    \begin{column}{0.54\textwidth}
+      \panel{orange}{\faUser\ The problem}{\raggedright Reclaimed floor tiles arrive \textbf{by the thousand}, and today a person
+        checks every one: \emph{cracked? chipped? still sellable?}\\[3pt]
+        {\color{orangeT}\faClockO}\ slow and tiring\\ {\color{orangeT}\faRandom}\ inspectors rarely agree on borderline tiles}
+      \vspace{0.5em}
+      \panel{green}{\faCamera\ What we built}{\raggedright An \textbf{inspection station}: a camera photographs each tile on the conveyor,
+        a \textbf{U-Net} marks the usable surface, the station decides \textbf{sell or recycle}.\\[3pt]
+        {\color{greenT}\faUser}\ people only see the tiles the model is unsure about}
     \end{column}
     \begin{column}{0.40\textwidth}
       \centering
-      \begin{tikzpicture}[node distance=0.42cm]
-        \node[box=blue, minimum width=3.6cm] (a) {\faCamera\ Photo\\[-1pt]\textnormal{\tiny one tile on the belt}};
-        \node[box=orange, minimum width=3.6cm, below=of a] (b) {\faEye\ U-Net\\[-1pt]\textnormal{\tiny belt / usable / damaged, per pixel}};
-        \node[box=green, minimum width=3.6cm, below=of b] (c) {\faPercent\ Usable share\\[-1pt]\textnormal{\tiny usable / whole tile}};
-        \node[box=gray, minimum width=3.6cm, below=of c] (d) {\faCheckCircle\ Verdict\\[-1pt]\textnormal{\tiny APPROVE if $\geq 85\,\%$, else REJECT}};
-        \draw[arr=blueLine] (a) -- (b); \draw[arr=orangeLine] (b) -- (c); \draw[arr=greenLine] (c) -- (d);
+      \begin{tikzpicture}[x=1cm, y=1cm]
+        \draw[rulegray, line width=2pt] (0,0) -- (0,-4.5);
+        \foreach \i/\c/\ic/\t/\d in {0/blue/\faCamera/Photo/{one tile on the belt},
+                                     1/orange/\faEye/U-Net/{belt, usable or damaged, per pixel},
+                                     2/green/\faPercent/Usable share/{usable $\div$ (usable + damaged)},
+                                     3/gray/\faCheckCircle/Verdict/{}} {
+          \pgfmathsetmacro{\y}{-\i*1.5}
+          \fill[\c BG] (0,\y) circle (0.45);
+          \draw[\c Line, line width=0.8pt] (0,\y) circle (0.45);
+          \node[font=\large, text=\c T] at (0,\y) {\ic};
+          \node[font=\footnotesize\bfseries, text=\c T, anchor=west] at (0.65,\y+0.15) {\t};
+          \node[font=\tiny, text=grayT, anchor=west] at (0.65,\y-0.18) {\d};
+        }
+        \node[fill=greenBG, text=greenT, font=\tiny\bfseries, rounded corners=2pt, inner sep=2.5pt, anchor=west] at (0.65,-4.68) {APPROVE if $\geq 85\,\%$};
+        \node[fill=redBG, text=redT, font=\tiny\bfseries, rounded corners=2pt, inner sep=2.5pt, anchor=west] at (2.85,-4.68) {else REJECT};
       \end{tikzpicture}
     \end{column}
   \end{columns}
@@ -118,33 +152,44 @@
 
   \vspace{0.7em}
   {\small Tiles arrive from intake, the camera and the \textbf{vision model} score each one, and a diverter
-  sends it to \textbf{resale} or \textbf{recycling}.\\
-  \color{muted}The notebook opens with this animation: it is the machine the students are about to build the brain for.}
+  sends it to \textbf{resale} or \textbf{recycling}.}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{Two halves of the same thing}
-  \vspace{0.4em}
   \centering
+  \vspace{-0.1em}
   \begin{tikzpicture}
-    \node[draw=rulegray, rounded corners=5pt, line width=0.7pt, text width=5.6cm, align=center, inner sep=8pt] (ex) {%
-      {\bfseries The exercise --- what students build}\\[6pt]
-      {\small\color{grayT} A Colab notebook. Students write the dataset, the U-Net, three decision heads,
-      run a receptive-field experiment and try transfer learning.}\\[4pt]
-      {\small\color{grayT} Live panels grade every step against targets.}\\[8pt]
-      \tikz\node[box=blue]{\faLaptop\ \texttt{notebook.ipynb}};};
-    \node[draw=rulegray, rounded corners=5pt, line width=0.7pt, text width=5.6cm, align=center, inner sep=8pt, anchor=north west] (pl) at ($(ex.north east)+(1.3cm,0)$) {%
-      {\bfseries The platform --- what it becomes}\\[6pt]
-      {\small\color{grayT} The same model inside the warehouse's web app: upload photos or use a phone camera,
-      review queue, lots, dashboard.}\\[4pt]
-      {\small\color{grayT} It runs on the student's own laptop.}\\[8pt]
-      \tikz\node[box=green]{\faIndustry\ Inspection platform};};
-    \draw[arr=accent] (ex.east) -- (ex.east -| pl.west);
+    % left: the notebook
+    \node[box=blue, minimum width=3.3cm, font=\normalsize\bfseries] (nb) {\faLaptop\ Notebook};
+    \node[font=\footnotesize\color{muted}, below=0.12cm of nb] (yb) {you build};
+    \node[chip=blue, below=0.18cm of yb] (c1) {Dataset};
+    \node[chip=blue, below=0.11cm of c1] (c2) {U-Net};
+    \node[chip=blue, below=0.11cm of c2] (c3) {Decision heads};
+    \node[chip=blue, below=0.11cm of c3, dashed, font=\footnotesize\mdseries] (c3b) {Bonus: transfer learning};
+    \node[chip=gray, below=0.22cm of c3b, font=\scriptsize\mdseries, text width=3.1cm, minimum height=0.8cm, text height=, text depth=] (c4) {\faCheck\ ready-made: receptive field experiments};
+    \begin{scope}[on background layer]
+      \node[draw=rulegray, rounded corners=6pt, line width=0.7pt, inner sep=9pt, fit=(nb)(c4)] (L) {};
+    \end{scope}
+
+    % right: the platform
+    \node[box=green, minimum width=3.3cm, font=\normalsize\bfseries] (pf) at ($(nb)+(7.2cm,0)$) {\faIndustry\ Platform};
+    \node[font=\footnotesize\color{muted}, below=0.12cm of pf] (ir) {it runs};
+    \node[chip=green, below=0.18cm of ir] (d1) {\faCamera\ Inspect tiles};
+    \node[chip=green, below=0.11cm of d1] (d2) {\faUser\ Review queue};
+    \node[chip=green, below=0.11cm of d2] (d3) {\faBarChart\ Dashboard};
+    \node[chip=gray, below=0.22cm of d3, font=\scriptsize\mdseries, text width=3.1cm, minimum height=0.8cm, text height=, text depth=] (d4) {\faHome\ on your own laptop};
+    \begin{scope}[on background layer]
+      \node[draw=rulegray, rounded corners=6pt, line width=0.7pt, inner sep=9pt, fit=(pf)(d4)] (R) {};
+    \end{scope}
+
+    % the file that connects them
+    \draw[arr=accent, line width=1.2pt] (L.east |- c2) -- node[above, font=\small\bfseries, text=accent] {\faFileO}
+      node[below, font=\scriptsize\ttfamily, text=ink] {platform\_model.pt} (R.west |- c2);
   \end{tikzpicture}
 
-  \vspace{0.7em}
-  One file connects them: \textbf{\texttt{platform\_model.pt}}. The notebook exports it in \S 11, the platform loads it
-  under \textit{Settings}. What the platform shows is exactly what the student trained.
+  \vspace{0.3em}
+  {\small\color{muted}What the platform shows is exactly what you trained.}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
@@ -238,85 +283,153 @@
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{What students build, step by step}
-  \vspace{0.1em}
-  \small
-  \renewcommand{\arraystretch}{1.12}
-  \begin{tabular}{@{}r p{3.0cm} p{5.5cm} p{4.4cm}@{}}
-    \toprule
-    \textbf{\S} & \textbf{Step} & \textbf{They write} & \textbf{The question it answers} \\
-    \midrule
-    2   & Dataset            & a \texttt{Dataset}: photo, class map, label \faPencil & can we feed the model correctly? \\
-    3   & First U-Net        & \texttt{encode} / \texttt{decode}, the training loop \faPencil & is segment-and-count enough? \\
-    4--5& FNN and CNN heads  & two classifiers on the bottleneck \faPencil & does the layout of the damage matter? \\
-    6--7& Evaluation         & --- (scoreboard, inspector, game) & which tiles fail, and why? \\
-    8   & Receptive field    & --- (depth-2/3/4 experiment) & why cracks look like stains \\
-    9   & Challenge          & improved U-Net, heads, a regressor \faPencil & can we beat every target? \\
-    10  & Transfer learning  & the decoder of a ResNet-18 U-Net \faPencil & do ImageNet features help? \\
-    11  & Deploy             & --- (export + download) & does it work in the product? \\
-    \bottomrule
-  \end{tabular}
+  \centering
+  \vspace{1.2em}
+  \begin{tikzpicture}[node distance=0.5cm]
+    % row 1
+    \node[step=blue] (s2) {\stephead{2}{Dataset}{blue}\stepq{can we feed the model correctly?}};
+    \node[step=blue, right=of s2] (s3) {\stephead{3}{First U-Net}{blue}\stepq{is segment-and-count enough?}};
+    \node[step=blue, right=of s3] (s4) {\stephead{4--5}{Decision heads}{blue}\stepq{FNN + CNN: can the bottleneck decide?}};
+    \node[step=gray, right=of s4] (s6) {\stephead{6--7}{Evaluation}{gray}\stepq{which tiles fail, and why?}};
+    % row 2
+    \node[step=gray, below=1.05cm of s2] (s8) {\stephead{8}{Receptive field}{gray}\stepq{why do cracks look like stains?}};
+    \node[step=blue, right=of s8] (s9) {\stephead{9}{Challenge}{blue}\stepq{better U-Net, heads + a regressor}};
+    \node[step=blue, dashed, right=of s9] (s10) {\stephead{10}{Transfer learning}{blue}\stepq{bonus: do ImageNet features help?}};
+    \node[step=gray, right=of s10] (s11) {\stephead{11}{Deploy}{gray}\stepq{export the model to the platform}};
 
-  \vspace{0.4em}
-  {\small \faPencil\ = one of the 11 TODO cells.} {\small Every section ends with a \faCompass\ \emph{Why this step?} note that hands its answer to the next.}
+    % task tags
+    \node[tag=blue] at (s2.north east)  {\faPencil\ Task 1};
+    \node[tag=blue] at (s3.north east)  {\faPencil\ Tasks 2--3};
+    \node[tag=blue] at (s4.north east)  {\faPencil\ Tasks 4--5};
+    \node[tag=blue] at (s9.north east)  {\faPencil\ Tasks 6--10};
+    \node[tag=blue] at (s10.north east) {\faPencil\ Task 11};
+    \node[tag=gray] at (s6.north east)  {\faPlay\ run};
+    \node[tag=gray] at (s8.north east)  {\faPlay\ run};
+    \node[tag=gray] at (s11.north east) {\faPlay\ run};
+
+    % flow
+    \foreach \a/\b in {s2/s3, s3/s4, s4/s6, s8/s9, s9/s10, s10/s11} \draw[arr] (\a) -- (\b);
+    \draw[arr, rounded corners=8pt] (s6.south) -- ++(0,-0.4) -| (s8.north);
+  \end{tikzpicture}
+
+  \vspace{0.9em}
+  {\footnotesize
+  \tikz[baseline=-0.6ex]\draw[blueLine, fill=blueBG, rounded corners=1.5pt, line width=0.6pt] (0,-0.12) rectangle (0.4,0.14); you write code
+  \qquad
+  \tikz[baseline=-0.6ex]\draw[grayLine, fill=grayBG, rounded corners=1.5pt, line width=0.6pt] (0,-0.12) rectangle (0.4,0.14); ready-made: run and explore
+  \qquad
+  \faCompass\ every section ends with a \emph{Why this step?} note}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{Why the first model fails: the receptive field}
-  \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \vspace{0.6em}
-      \panel{blue}{What a pixel can see}{Each output pixel of a CNN depends on a limited patch of the input,
-      its \textbf{receptive field}. If the patch is smaller than the pattern, a crack and a dark stain look the same.}
-      \vspace{0.4em}
-      \panel{green}{The experiment (\S 8)}{Train the same U-Net at \textbf{depth 2, 3 and 4}. Measure the
-      theoretical and the \emph{effective} receptive field (input gradients), and click a spot on a tile
-      to see what each model sees there.}
-    \end{column}
-    \begin{column}{0.42\textwidth}
-      \vspace{0.8em}
-      \centering
-      {\small\bfseries Threshold accuracy on the test set}\\[5pt]
-      \renewcommand{\arraystretch}{1.25}
-      \begin{tabular}{@{}lr@{}}
-        \toprule
-        Basic U-Net (\S 3) & 86.3\,\% \\
-        DepthUNet, depth 2 & 92.4\,\% \\
-        DepthUNet, depth 3 & 92.5\,\% \\
-        DepthUNet, depth 4 & 92.8\,\% \\
-        \bottomrule
-      \end{tabular}
+  \centering
+  \vspace{0.2em}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    % ── two tiles: what a small vs. a large window sees ─────────────────────
+    \foreach \ox/\big/\t/\c in {0/0/Small receptive field/orange, 3.35/1/Large receptive field/green} {
+      \begin{scope}[shift={(\ox,0)}]
+        \node[font=\footnotesize\bfseries, text=\c T] at (1.5,3.55) {\t};
+        \fill[usable, draw=grayLine, line width=0.6pt, rounded corners=2pt] (0,0) rectangle (3,3.1);
+        % crack (left) and stain (right)
+        \draw[ink!85, line width=1.1pt, line join=round] (0.55,3.1) -- (0.75,2.45) -- (0.6,1.9) -- (0.9,1.35) -- (0.8,0.7) -- (1.0,0);
+        \fill[brown!55!black, opacity=0.45] (2.15,1.55) ellipse (0.55 and 0.42);
+        \fill[brown!55!black, opacity=0.35] (2.0,1.7) ellipse (0.3 and 0.22);
+        \ifnum\big=0
+          \draw[orangeT, line width=1pt] (0.47,1.67) rectangle (0.97,2.17);
+          \draw[orangeT, line width=1pt] (1.42,1.3) rectangle (1.92,1.8);
+          \node[font=\small\bfseries, text=orangeT] at (0.72,2.42) {?};
+          \node[font=\small\bfseries, text=orangeT] at (1.67,2.05) {?};
+          \node[font=\scriptsize, text=grayT, align=center] at (1.5,-0.45) {both look like\\a thin dark line};
+        \else
+          \draw[greenT, line width=1pt] (0.15,0.55) rectangle (1.4,2.95);
+          \draw[greenT, line width=1pt] (1.45,0.9) rectangle (2.85,2.2);
+          \node[fill=white, font=\tiny\bfseries, text=greenT, inner sep=1.5pt] at (0.78,0.4) {\faCheck\ crack};
+          \node[fill=white, font=\tiny\bfseries, text=greenT, inner sep=1.5pt] at (2.15,0.72) {\faCheck\ stain};
+          \node[font=\scriptsize, text=grayT, align=center] at (1.5,-0.45) {the whole mark\\and its context};
+        \fi
+      \end{scope}
+    }
+    \draw[arr=accent, line width=1pt] (3.05,1.55) -- node[above, font=\tiny\bfseries, text=accent] {deeper} (3.3,1.55);
 
-      \vspace{0.8em}
-      \panel{orange}{The lesson}{Depth sharpens the masks, but the verdict saturates. The rest has to come
-      from a better architecture, training and pretrained features.}
-    \end{column}
-  \end{columns}
+    % ── accuracy: a jump, then a plateau ────────────────────────────────────
+    \begin{scope}[shift={(7.6,0.05)}]
+      \node[font=\footnotesize\bfseries, anchor=west] at (0,3.5) {Threshold accuracy (test set)};
+      % axis: 80 % … 95 % over 3.9 cm
+      \foreach \y/\n/\v/\c in {2.65/{Basic U-Net}/86.3/redLine, 1.85/{depth 2}/92.4/greenLine,
+                               1.05/{depth 3}/92.5/greenLine, 0.25/{depth 4}/92.8/greenLine} {
+        \node[font=\scriptsize, anchor=east] at (1.75,\y) {\n};
+        \fill[grayBG] (1.85,\y-0.22) rectangle (5.75,\y+0.22);
+        \fill[\c] (1.85,\y-0.22) rectangle ({1.85+(\v-80)*0.26},\y+0.22);
+        \node[font=\scriptsize\bfseries, anchor=west] at ({1.85+(\v-80)*0.26},\y) {\v\,\%};
+      }
+      \node[font=\tiny, text=muted, anchor=north west] at (1.85,-0.05) {axis from 80\,\%};
+      \draw[decorate, decoration={brace, amplitude=4pt}, orangeT, line width=0.7pt] (6.15,2.05) -- (6.15,0.05)
+        node[midway, right=5pt, font=\tiny\bfseries, text=orangeT, align=left] {+0.4\\pts};
+    \end{scope}
+  \end{tikzpicture}
+
+  \vspace{0.9em}
+  \tikz\node[fill=orangeBG, text=orangeT, rounded corners=7pt, inner sep=5pt, font=\footnotesize]{\faLightbulbO\
+    \textbf{Depth helps once, then saturates.} The rest needs a better model, better training and pretrained features.};
+
+  \vspace{0.35em}
+  {\scriptsize\color{muted}\S 8, ready-made: train depth 2, 3, 4 \textbullet\ measure theoretical and effective receptive fields \textbullet\ click a tile to see what each model sees}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{The journey in numbers}
-  \vspace{0.5em}
   \centering
-  \bignum{0.28\textwidth}{\color{muted}86.3\,\%}{basic U-Net (\S 3)}\hfill
-  \bignum{0.28\textwidth}{\color{accent}97.3\,\%}{improved U-Net (\S 9)}\hfill
-  \bignum{0.28\textwidth}{\color{greenT}98.5\,\%}{pretrained ResNet-18 (\S 10)}
+  {\small How often is the \textbf{verdict right}? \color{muted}(U-Net + the 85\,\% rule, on 750 test tiles the models never saw)}
 
-  \vspace{0.3em}
-  {\small\color{muted}threshold-rule accuracy on 750 test tiles}
+  \vspace{0.5em}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \foreach \ox/\c/\v/\name/\sec/\wrong/\nw/\ok in {
+        0/red/86.3/Basic U-Net/\S 3/14/103/0,
+        4.5/blue/97.3/Improved U-Net/\S 9/3/20/1,
+        9.0/green/98.5/ResNet-18 U-Net/{\S 10, pretrained}/2/11/1} {
+      \begin{scope}[shift={(\ox,0)}]
+        \fill[\c BG, rounded corners=6pt] (0,0) rectangle (4.2,2.75);
+        \node[font=\fontsize{18}{20}\selectfont\bfseries, text=\c T, anchor=west] at (0.2,2.2) {\v\,\%};
+        \node[font=\scriptsize\bfseries, anchor=west] at (0.2,1.45) {\name};
+        \node[font=\tiny, text=muted, anchor=west] at (0.2,1.15) {\sec};
+        \node[font=\scriptsize, anchor=west] at (0.2,0.68) {$\approx$\,\textbf{\nw} of 750 wrong};
+        \ifnum\ok=1
+          \node[font=\tiny\bfseries, text=greenT, anchor=west] at (0.2,0.3) {\faCheck\ target $\geq 96\,\%$ met};
+        \else
+          \node[font=\tiny\bfseries, text=redT, anchor=west] at (0.2,0.3) {\faTimes\ below the 96\,\% target};
+        \fi
+        % waffle: 100 squares, 1 square = 1 % of the tiles, red = wrong verdict
+        \foreach \k in {0,...,99} {
+          \pgfmathtruncatemacro{\col}{mod(\k,10)}
+          \pgfmathtruncatemacro{\row}{div(\k,10)}
+          \ifnum\k<\wrong \def\fillc{damaged}\else\def\fillc{greenLine!70}\fi
+          \fill[\fillc] ({2.75+\col*0.135},{0.28+\row*0.135}) rectangle ++(0.11,0.11);
+        }
+      \end{scope}
+    }
+    \node[font=\tiny, text=muted, anchor=north east] at (13.2,-0.05) {each square = 1\,\% of the test tiles \quad \tikz\fill[damaged] (0,0) rectangle (0.12,0.12); wrong verdict};
+  \end{tikzpicture}
 
-  \vspace{0.6em}
-  \renewcommand{\arraystretch}{1.1}
-  \begin{tabular}{@{}lcccc@{}}
-    \toprule
-    & \textbf{mean IoU} & \textbf{usable-share error} & \textbf{CNN head} & \textbf{regressor} \\
-    \midrule
-    Basic U-Net     & 0.587 & 7.5 pp  & 70.8\,\% & --- \\
-    Improved U-Net  & 0.935 & 1.86 pp & 93.1\,\% & 91.7\,\% \\
-    ResNet-18 U-Net & \textbf{0.958} & \textbf{0.92 pp} & --- & \textbf{94.1\,\%} \\
-    \midrule
-    \color{muted}Target (\S 9) & \color{muted}$\geq$ 0.90 & \color{muted}$\leq$ 2.5 pp & \color{muted}$\geq$ 92\,\% & \color{muted}$\geq$ 90\,\% \\
-    \bottomrule
-  \end{tabular}
+  \vspace{0.7em}
+  % ── why the verdict got better ──────────────────────────────────────────
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \foreach \x/\c/\t/\vals/\d in {
+        0/orange/Better masks/{mean IoU \;0.59 $\rightarrow$ 0.94 $\rightarrow$ 0.96}/{overlap with the true regions (1 = perfect)},
+        4.5/orange/Better usable share/{error \;7.5 $\rightarrow$ 1.9 $\rightarrow$ 0.9 points}/{fewer tiles pushed across the 85\,\% line},
+        9.0/green/More correct verdicts/{86.3 $\rightarrow$ 97.3 $\rightarrow$ 98.5\,\%}/{the big numbers above}} {
+      \draw[\c Line, rounded corners=5pt, line width=0.7pt, fill=white] (\x,0) rectangle ++(4.2,1.15);
+      \node[font=\scriptsize\bfseries, text=\c T, anchor=west] at (\x+0.15,0.88) {\t};
+      \node[font=\scriptsize, anchor=west] at (\x+0.15,0.55) {\vals};
+      \node[font=\tiny, text=grayT, anchor=west] at (\x+0.15,0.25) {\d};
+    }
+    \draw[arr, line width=0.8pt] (4.22,0.575) -- (4.48,0.575);
+    \draw[arr, line width=0.8pt] (8.72,0.575) -- (8.98,0.575);
+  \end{tikzpicture}
+
+  \vspace{0.45em}
+  {\scriptsize\color{grayT}\faLightbulbO\ On the same improved U-Net, the heads decide less well than counting pixels:
+  CNN \textbf{93.1\,\%}, regressor \textbf{91.7\,\%} vs.\ \textbf{97.3\,\%}.}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
@@ -342,34 +455,71 @@
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{An interactive notebook}
-  \vspace{0.5em}
-  \begin{columns}[T]
-    \begin{column}{0.31\textwidth}
-      {\bfseries\color{blueT}\faLineChart\ Train}\\[3pt]
-      \small
-      \textbf{Live dashboard}\\{\color{muted}loss and accuracy per epoch, against the target}\\[4pt]
-      \textbf{Architecture diagram}\\{\color{muted}every block with its shape}
-    \end{column}
-    \begin{column}{0.31\textwidth}
-      {\bfseries\color{greenT}\faCheckSquareO\ Evaluate}\\[3pt]
-      \small
-      \textbf{Scoreboard}\\{\color{muted}every method against its target, all attempts kept}\\[4pt]
-      \textbf{Confusion matrix}\\{\color{muted}click a cell to see those tiles}\\[4pt]
-      \textbf{Inspector and galleries}\\{\color{muted}error overlays, model vs.\ model}
-    \end{column}
-    \begin{column}{0.31\textwidth}
-      {\bfseries\color{orangeT}\faSliders\ Explore}\\[3pt]
-      \small
-      \textbf{Threshold \& cost explorer}\\{\color{muted}drag the line, price the mistakes}\\[4pt]
-      \textbf{Receptive-field visualiser}\\{\color{muted}click a spot, see what each model sees}\\[4pt]
-      \textbf{You vs.\ the model}\\{\color{muted}a game in Colab, scored against the truth}
-    \end{column}
-  \end{columns}
+  \centering
+  \vspace{0.2em}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    % ── card frames ─────────────────────────────────────────────────────────
+    \foreach \x/\c in {0/blue, 4.75/green, 9.5/orange} {
+      \fill[\c BG, rounded corners=6pt] (\x,0) rectangle ++(4.35,5.15);
+      \fill[\c T, rounded corners=6pt] (\x,4.55) rectangle ++(4.35,0.6);
+      \fill[\c T] (\x,4.55) rectangle ++(4.35,0.2);
+      \fill[white, rounded corners=3pt] (\x+0.25,2.25) rectangle ++(3.85,2.05);
+    }
+    \node[anchor=west, text=white, font=\bfseries] at (0.25,4.85)  {\faLineChart\ Train};
+    \node[anchor=west, text=white, font=\bfseries] at (5.0,4.85)   {\faCheckSquareO\ Evaluate};
+    \node[anchor=west, text=white, font=\bfseries] at (9.75,4.85)  {\faSliders\ Explore};
 
-  \vspace{0.5em}
-  \panel{gray}{Built for a course that runs over days}{Plain HTML panels (they work in Colab, Safari included, and stay in the saved
-  notebook). Plumbing cells are folded into Colab forms. Models are saved to Drive, and a
-  \textbf{\faPlay\ RESUME HERE} cell per section reloads exactly what that section needs.}
+    % ── Train: live loss / accuracy curves with a target line ──────────────
+    \begin{scope}[shift={(0.55,2.5)}]
+      \draw[rulegray] (0,0) -- (3.3,0) (0,0) -- (0,1.5);
+      \draw[greenLine, dashed, line width=0.6pt] (0,1.3) -- (3.3,1.3) node[above left, font=\tiny, text=greenT, inner sep=1pt] {target};
+      \draw[redLine, line width=1.1pt] plot[smooth] coordinates {(0,1.35) (0.4,0.8) (0.9,0.5) (1.5,0.35) (2.2,0.27) (3.2,0.22)};
+      \draw[blueT, line width=1.1pt] plot[smooth] coordinates {(0,0.3) (0.4,0.75) (0.9,1.0) (1.5,1.17) (2.2,1.27) (3.2,1.34)};
+      \node[font=\tiny, text=redT, anchor=west] at (2.3,0.45) {loss};
+      \node[font=\tiny, text=blueT, anchor=west] at (2.4,1.05) {accuracy};
+    \end{scope}
+
+    % ── Evaluate: scoreboard bars against targets ──────────────────────────
+    \begin{scope}[shift={(5.15,2.5)}]
+      \foreach \y/\n/\v/\t/\ok in {1.35/Threshold/3.05/2.95/1, 0.9/FNN/2.4/2.3/1, 0.45/CNN/2.7/2.85/0, 0/Regressor/2.9/2.75/1} {
+        \node[font=\tiny, anchor=east, text=grayT] at (0.95,\y+0.1) {\n};
+        \fill[grayBG] (1.0,\y) rectangle (3.4,\y+0.2);
+        \ifnum\ok=1 \fill[greenLine] (1.0,\y) rectangle ({1.0+(\v-1.0)*0.8},\y+0.2);
+        \else \fill[orangeLine] (1.0,\y) rectangle ({1.0+(\v-1.0)*0.8},\y+0.2); \fi
+        \draw[ink, line width=0.9pt] ({1.0+(\t-1.0)*0.8},\y-0.04) -- ({1.0+(\t-1.0)*0.8},\y+0.24);
+      }
+    \end{scope}
+
+    % ── Explore: true vs. predicted usable share with a draggable threshold ─
+    \begin{scope}[shift={(9.85,2.45)}]
+      \fill[redBG] (0,0) rectangle (3.3,1.6);
+      \fill[greenBG] (2.15,0) rectangle (3.3,1.6);
+      \foreach \px/\py in {0.3/0.2, 0.6/0.45, 0.9/0.5, 1.2/0.75, 1.5/0.8, 1.8/0.95, 2.0/1.0, 2.3/1.1, 2.5/1.25, 2.7/1.3, 2.9/1.4, 3.1/1.5, 1.95/1.12, 2.25/0.92}
+        \fill[blueT] (\px,\py) circle (1.5pt);
+      \draw[accent, line width=1.4pt] (2.15,-0.05) -- (2.15,1.65);
+      \fill[accent] (2.15,1.65) circle (3pt);
+      \node[font=\tiny\bfseries, text=accent, anchor=west] at (2.25,1.62) {85\,\%};
+      \node[font=\tiny, text=redT] at (0.75,1.38) {reject};
+      \node[font=\tiny, text=greenT] at (2.75,0.18) {approve};
+    \end{scope}
+
+    % ── widget names ───────────────────────────────────────────────────────
+    \node[anchor=north west, text width=3.9cm, font=\footnotesize, align=left] at (0.2,2.05) {%
+      \textbf{Live dashboard}\\{\color{grayT}curves against the target}\\[3pt]
+      \textbf{Architecture diagram}\\{\color{grayT}every block with its shape}};
+    \node[anchor=north west, text width=3.9cm, font=\footnotesize, align=left] at (4.95,2.05) {%
+      \textbf{Scoreboard}\\{\color{grayT}all methods, all attempts}\\[3pt]
+      \textbf{Confusion matrix + inspector}\\{\color{grayT}click a cell, see its error maps}};
+    \node[anchor=north west, text width=3.9cm, font=\footnotesize, align=left] at (9.7,2.05) {%
+      \textbf{Threshold \& cost}\\{\color{grayT}drag the line, price errors}\\[3pt]
+      \textbf{You vs.\ the model}\\{\color{grayT}a game: who inspects better?}};
+  \end{tikzpicture}
+
+  \vspace{0.55em}
+  {\footnotesize\color{grayT}
+  \faCode\ plain HTML, works in Colab \quad\textbullet\quad
+  \faCloud\ models saved to Drive \quad\textbullet\quad
+  \faPlay\ \textbf{RESUME HERE} in every section}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
@@ -402,32 +552,53 @@
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{How the pieces talk}
-  \vspace{0.6em}
   \centering
-  \begin{tikzpicture}
-    \node[box=blue, minimum width=3.0cm, minimum height=1.1cm] (br) {\faGlobe\ Browser\\[-1pt]\textnormal{\tiny React + TypeScript}};
-    \node[box=green, minimum width=3.0cm, minimum height=1.1cm, right=3.2cm of br] (api) {\faServer\ FastAPI\\[-1pt]\textnormal{\tiny one Python process}};
-    \node[box=orange, minimum width=3.0cm, minimum height=1.1cm, right=2.2cm of api] (mdl) {\faEye\ U-Net\\[-1pt]\textnormal{\tiny TorchScript, CPU or GPU}};
-    \draw[arr=blueLine] ([yshift=4pt]br.east) to[bend left=18] node[above, font=\tiny, text=muted]{1\; REST, JSON \texttt{/api/*}} ([yshift=4pt]api.west);
-    \draw[arr=greenLine] ([yshift=-4pt]api.west) to[bend left=18] node[below, font=\tiny, text=muted]{2\; images \texttt{/media/*}} ([yshift=-4pt]br.east);
-    \draw[arr=orangeLine, <->] (api) -- node[above, font=\tiny, text=muted]{3\; tensor in, logits out} (mdl);
+  \vspace{0.1em}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    % ── components ─────────────────────────────────────────────────────────
+    \foreach \x/\y/\c/\ic/\t/\d/\n in {0/0/blue/\faGlobe/Browser/{React + TypeScript}/br,
+                                       6.2/0/green/\faServer/FastAPI/{one Python process}/api,
+                                       12.0/0/orange/\faEye/U-Net/{TorchScript, CPU or GPU}/mdl} {
+      \fill[\c BG] (\x,\y) circle (0.58);
+      \draw[\c Line, line width=0.9pt] (\x,\y) circle (0.58);
+      \node[font=\LARGE, text=\c T] at (\x,\y) {\ic};
+      \node[font=\small\bfseries, text=\c T] at (\x,\y-0.85) {\t};
+      \node[font=\tiny, text=grayT] at (\x,\y-1.12) {\d};
+      \coordinate (\n) at (\x,\y);
+    }
+    % storage under the server
+    \node[draw=grayLine, fill=grayBG, rounded corners=4pt, line width=0.7pt, font=\scriptsize, align=center, inner sep=4pt]
+      (db) at (6.2,-2.05) {\faDatabase\ \textbf{SQLite} \;+\; \faPictureO\ \textbf{image files}};
+    \draw[arr=grayLine, <->] (6.2,-1.32) -- (db.north);
+
+    % ── arrows with numbered badges ────────────────────────────────────────
+    \draw[arr=blueLine, line width=0.9pt] (0.7,0.22) to[bend left=14] (5.5,0.22);
+    \draw[arr=greenLine, line width=0.9pt] (5.5,-0.22) to[bend left=14] (0.7,-0.22);
+    \draw[arr=orangeLine, <->, line width=0.9pt] (6.9,0) -- (11.3,0);
+    \foreach \x/\y/\c/\n/\t in {3.1/0.82/blue/1/{REST + JSON, \texttt{/api/*}},
+                                3.1/-0.82/green/2/{images, \texttt{/media/*}},
+                                8.0/0.32/orange/3/{tensor in, logits out}} {
+      \node[circle, fill=\c T, text=white, font=\tiny\bfseries, inner sep=1.6pt] (b) at (\x,\y) {\n};
+      \node[font=\tiny, text=grayT, anchor=west] at (b.east) {\t};
+    }
   \end{tikzpicture}
 
-  \vspace{1.0em}
-  \begin{columns}[T]
-    \begin{column}{0.31\textwidth}
-      \panel{blue}{\faExchange\ 1 \; A REST request}{The browser sends photos and asks for data; the server answers with JSON.\\[2pt]
-      {\scriptsize\ttfamily POST /api/inspections\\GET\; /api/dashboard\\GET\; /api/review-queue}}
-    \end{column}
-    \begin{column}{0.31\textwidth}
-      \panel{green}{\faPictureO\ 2 \; Stored images}{Every photo, overlay and class mask is saved on disk and served as a file,
-      so the database stays small and the history can be re-opened.}
-    \end{column}
-    \begin{column}{0.31\textwidth}
-      \panel{orange}{\faCogs\ 3 \; The model}{Loaded once at start-up. The same preprocessing as the notebook:
-      greyscale, 256\,$\times$\,256, values in $[0,1]$.}
-    \end{column}
-  \end{columns}
+  \vspace{0.9em}
+  % ── what each arrow carries ──────────────────────────────────────────────
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \foreach \x/\c/\n/\t/\d in {
+      0/blue/1/A REST request/{The browser sends photos and asks for data; JSON comes back.\\[3pt]
+        {\tiny\ttfamily POST /api/inspections\\GET\ \ /api/review-queue}},
+      4.45/green/2/Stored images/{Photos, overlays and masks are saved as files, so the database stays small
+        and any inspection can be re-opened.},
+      8.9/orange/3/The model/{Loaded once at start-up, with the notebook's preprocessing:
+        grey, 256\,$\times$\,256, values in $[0,1]$.}} {
+      \fill[\c BG, rounded corners=6pt] (\x,0) rectangle ++(4.15,2.05);
+      \node[circle, fill=\c T, text=white, font=\scriptsize\bfseries, inner sep=2pt] at (\x+0.38,1.7) {\n};
+      \node[font=\small\bfseries, text=\c T, anchor=west] at (\x+0.65,1.7) {\t};
+      \node[font=\scriptsize, text=ink, anchor=north west, text width=3.75cm, align=left] at (\x+0.18,1.35) {\d};
+    }
+  \end{tikzpicture}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
@@ -457,40 +628,63 @@
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{One tile through the platform}
-  \vspace{0.5em}
   \centering
-  \begin{tikzpicture}[node distance=0.22cm, every node/.append style={font=\scriptsize\bfseries}]
-    \node[box=gray, text width=1.35cm] (s1) {\faUpload\ Upload\\[-1pt]\textnormal{\tiny JPG, PNG, HEIC}};
-    \node[box=blue, text width=1.35cm, right=of s1] (s2) {Prepare\\[-1pt]\textnormal{\tiny grey, 256\,px, /255}};
-    \node[box=orange, text width=1.35cm, right=of s2] (s3) {U-Net\\[-1pt]\textnormal{\tiny 3-class logits}};
-    \node[box=orange, text width=1.35cm, right=of s3] (s4) {Mask\\[-1pt]\textnormal{\tiny argmax per pixel}};
-    \node[box=green, text width=1.35cm, right=of s4] (s5) {Measure\\[-1pt]\textnormal{\tiny usable share + confidence}};
-    \node[box=blue, text width=1.35cm, right=of s5] (s6) {Decide\\[-1pt]\textnormal{\tiny \texttt{rules.py}}};
-    \node[box=gray, text width=1.35cm, right=of s6] (s7) {Store\\[-1pt]\textnormal{\tiny overlay, DB, audit}};
-    \foreach \a/\b in {s1/s2,s2/s3,s3/s4,s4/s5,s5/s6,s6/s7} \draw[arr] (\a) -- (\b);
+  \vspace{0.3em}
+  % ── the pipeline ─────────────────────────────────────────────────────────
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \draw[rulegray, line width=2pt] (0,0) -- (12.6,0);
+    \foreach \i/\c/\ic/\t/\d in {0/gray/\faUpload/Upload/{JPG, PNG, HEIC},
+                                 1/blue/\faAdjust/Prepare/{grey, 256\,px, /255},
+                                 2/orange/\faEye/U-Net/{3-class logits},
+                                 3/orange/\faTh/Mask/{argmax per pixel},
+                                 4/green/\faPercent/Measure/{usable share\\+ confidence},
+                                 5/blue/\faBalanceScale/Decide/{\texttt{rules.py}},
+                                 6/gray/\faDatabase/Store/{overlay, DB,\\audit trail}} {
+      \pgfmathsetmacro{\x}{\i*2.1}
+      \fill[\c BG] (\x,0) circle (0.45);
+      \draw[\c Line, line width=0.8pt] (\x,0) circle (0.45);
+      \node[font=\large, text=\c T] at (\x,0) {\ic};
+      \node[font=\footnotesize\bfseries, text=\c T] at (\x,-0.72) {\t};
+      \node[font=\tiny, text=grayT, align=center, anchor=north] at (\x,-0.92) {\d};
+    }
+    \node[font=\tiny, text=muted, anchor=south] at (6.3,0.55) {\faClockO\ $\approx$\,70\,ms per tile on a laptop CPU (ResNet U-Net)};
   \end{tikzpicture}
 
-  \vspace{0.7em}
-  \begin{columns}[T]
-    \begin{column}{0.40\textwidth}
-      \renewcommand{\arraystretch}{1.2}
-      \begin{tabular}{@{}ll@{}}
-        \toprule
-        \textbf{Usable share} & \textbf{Verdict} \\
-        \midrule
-        $\geq 90\,\%$         & \colorbox{greenBG}{\color{greenT}\bfseries APPROVE} \\
-        $80$ -- $90\,\%$      & \colorbox{orangeBG}{\color{orangeT}\bfseries REVIEW} \\
-        $< 80\,\%$            & \colorbox{redBG}{\color{redT}\bfseries REJECT} \\
-        \bottomrule
-      \end{tabular}\\[4pt]
-      {\scriptsize\color{muted}the $\pm 5$-point review band around 85\,\% (all adjustable)}
-    \end{column}
-    \begin{column}{0.52\textwidth}
-      \panel{blue}{Confidence}{\small $\sqrt{\text{margin} \times \text{mask certainty}}$: far from the line \emph{and} a crisp mask.
-      Below 40\,\% a tile goes to review, whatever its share. On a laptop CPU the ResNet U-Net takes
-      \textbf{$\approx$\,70 ms} per tile.}
-    \end{column}
-  \end{columns}
+  \vspace{1.1em}
+  % ── the decision ────────────────────────────────────────────────────────
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    % usable-share bar, 50 % … 100 % over 7 cm
+    \node[font=\small\bfseries, anchor=west] at (0,2.15) {Decide: usable share};
+    \fill[redBG]    (0,0.6) rectangle ({(80-50)*0.14},1.35);
+    \fill[orangeBG] ({(80-50)*0.14},0.6) rectangle ({(90-50)*0.14},1.35);
+    \fill[greenBG]  ({(90-50)*0.14},0.6) rectangle (7,1.35);
+    \draw[accent, line width=1.3pt] ({(85-50)*0.14},0.5) -- ({(85-50)*0.14},0.8) ({(85-50)*0.14},1.15) -- ({(85-50)*0.14},1.6);
+    \node[font=\scriptsize\bfseries, text=redT]    at ({(65-50)*0.14},0.975) {REJECT};
+    \node[font=\scriptsize\bfseries, text=orangeT] at ({(85-50)*0.14},0.975) {REVIEW};
+    \node[font=\scriptsize\bfseries, text=greenT]  at ({(95-50)*0.14},0.975) {APPROVE};
+    \node[font=\tiny\bfseries, text=accent, anchor=south] at ({(85-50)*0.14},1.6) {85\,\% line};
+    \foreach \v in {50,60,70,80,90,100} {
+      \draw[muted] ({(\v-50)*0.14},0.6) -- ({(\v-50)*0.14},0.5);
+      \node[font=\tiny, text=muted, anchor=north] at ({(\v-50)*0.14},0.48) {\v\,\%};
+    }
+    \draw[orangeLine, decorate, decoration={brace, amplitude=3pt, mirror}] ({(80-50)*0.14},0.12) -- ({(90-50)*0.14},0.12)
+      node[midway, below=2pt, font=\tiny, text=orangeT] {$\pm 5$ points: a person decides};
+
+    % confidence card
+    \begin{scope}[shift={(7.7,0)}]
+      \fill[blueBG, rounded corners=6pt] (0,-0.45) rectangle (5.4,2.4);
+      \node[font=\small\bfseries, text=blueT, anchor=west] at (0.2,2.05) {\faShield\ Confidence check};
+      \node[anchor=center] at (2.7,1.25) {%
+        $\sqrt{\;\tikz[baseline=-0.6ex]\node[fill=white, rounded corners=2pt, inner sep=2pt, font=\scriptsize]{far from 85\,\%};
+        \times
+        \tikz[baseline=-0.6ex]\node[fill=white, rounded corners=2pt, inner sep=2pt, font=\scriptsize]{crisp mask};\;}$};
+      \node[font=\scriptsize, text=grayT, align=center, text width=5cm] at (2.7,0.2) {%
+        below \textbf{40\,\%} $\rightarrow$ {\color{orangeT}\bfseries REVIEW},\\ whatever the share};
+    \end{scope}
+  \end{tikzpicture}
+
+  \vspace{0.3em}
+  {\tiny\color{muted}Threshold, band and minimum confidence are all adjustable in Settings.}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
@@ -537,78 +731,131 @@
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{Getting it running: double-click}
-  \vspace{0.6em}
   \centering
-  \begin{tikzpicture}[node distance=0.5cm]
-    \node[draw=rulegray, rounded corners=4pt, align=center, inner sep=6pt, font=\small] (l) {\faMousePointer\ \texttt{start-windows.bat}\\\texttt{start-mac.command}\\[-1pt]{\tiny\color{muted}Linux: \texttt{./run.sh}}};
-    \node[box=blue, right=of l] (p) {1 \textbullet\ Python\\[-1pt]\textnormal{\tiny finds 3.10 or newer}};
-    \node[box=blue, right=of p] (v) {2 \textbullet\ Setup\\[-1pt]\textnormal{\tiny private \texttt{.venv}, once}};
-    \node[box=blue, right=of v] (s) {3 \textbullet\ Start\\[-1pt]\textnormal{\tiny free port, demo history}};
-    \node[font=\small\bfseries, text=greenT, below=0.5cm of s] (o) {the browser opens};
-    \draw[arr] (l) -- (p); \draw[arr] (p) -- (v); \draw[arr] (v) -- (s); \draw[arr=greenLine] (s) -- (o);
+  \vspace{1.4em}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    % ── launchers ──────────────────────────────────────────────────────────
+    \foreach \y/\ic/\os/\f in {2.5/\faWindows/Windows/start-windows.bat, 1.2/{\faApple\,\faLinux}/macOS \& Linux/start-mac.command} {
+      \node[draw=rulegray, fill=white, rounded corners=4pt, line width=0.7pt, minimum width=3.45cm, minimum height=1.0cm,
+            align=left, anchor=west, inner sep=4pt] at (0,\y) {};
+      \node[font=\large, text=ink, anchor=center] at (0.5,\y) {\ic};
+      \node[anchor=west, align=left, inner sep=0pt] at (0.98,\y) {{\tiny\color{muted}\os}\\[-2pt]{\scriptsize\ttfamily\f}};
+    }
+    \node[font=\large, text=accent] at (3.2,2.85) {\faMousePointer};
+    \node[font=\scriptsize\bfseries, text=accent, anchor=south] at (1.68,3.15) {you: double-click};
+
+    % ── three steps ────────────────────────────────────────────────────────
+    \draw[arr=accent, line width=1pt] (3.45,1.85) -- (3.95,1.85);
+    \draw[accent!35, line width=2.5pt] (4.6,1.85) -- (7.6,1.85);
+    \foreach \x/\n/\t/\d in {4.6/1/Python/3.10 or newer, 6.1/2/Install/own \texttt{.venv}, 7.6/3/Start/demo data + free port} {
+      \fill[accent] (\x,1.85) circle (0.36);
+      \node[text=white, font=\bfseries] at (\x,1.85) {\n};
+      \node[font=\footnotesize\bfseries, text=blueT] at (\x,2.55) {\t};
+      \node[font=\tiny, text=grayT, align=center, text width=1.45cm] at (\x,1.12) {\d};
+    }
+    \draw[accent!60, dashed, rounded corners=6pt, line width=0.7pt] (3.95,0.25) rectangle (8.25,3.25);
+    \node[font=\scriptsize\bfseries, text=accent, fill=white, inner sep=2pt] at (6.1,3.25) {\faCogs\ the script does this, not you};
+    \node[font=\tiny, text=muted] at (6.1,0.5) {\faClockO\ first run: a few minutes, then seconds};
+    \draw[arr=greenLine, line width=1pt] (8.25,1.85) -- (8.7,1.85);
+
+    % ── browser window with the real dashboard ─────────────────────────────
+    \begin{scope}[shift={(8.75,0)}]
+      \fill[black!10] (0.06,-0.06) rectangle (5.36,3.64);
+      \fill[white, draw=rulegray, line width=0.7pt, rounded corners=3pt] (0,0) rectangle (5.3,3.7);
+      \fill[grayBG, rounded corners=3pt] (0,3.3) rectangle (5.3,3.7);
+      \fill[grayBG] (0,3.3) rectangle (5.3,3.4);
+      \foreach \c/\x in {redLine/0.18, orangeLine/0.36, greenLine/0.54} \fill[\c] (\x,3.5) circle (0.06);
+      \fill[white, rounded corners=2pt] (0.8,3.39) rectangle (4.9,3.61);
+      \node[font=\tiny\ttfamily, text=grayT, anchor=west] at (0.88,3.5) {\faLock\ 127.0.0.1:8000};
+      \node[inner sep=0pt, anchor=south west] at (0.08,0.08) {\includegraphics[width=5.14cm, height=3.17cm]{platform_dashboard.png}};
+    \end{scope}
   \end{tikzpicture}
 
-  \vspace{0.6em}
-  \begin{columns}[T]
-    \begin{column}{0.30\textwidth}\centering
-      {\bfseries No Node needed}\\[3pt]
-      {\small\color{grayT}The interface ships pre-built and is served by the backend, so nobody runs \texttt{npm}.}
-    \end{column}
-    \begin{column}{0.30\textwidth}\centering
-      {\bfseries Nothing system-wide}\\[3pt]
-      {\small\color{grayT}Packages go into the platform's own \texttt{.venv}. An interrupted install is simply redone.}
-    \end{column}
-    \begin{column}{0.30\textwidth}\centering
-      {\bfseries A model included}\\[3pt]
-      {\small\color{grayT}It starts with the staff's ResNet-18 U-Net, so the demo works before anyone has trained anything.}
-    \end{column}
-  \end{columns}
+  \vspace{1.6em}
+  \begin{tikzpicture}
+    \foreach \x/\c/\ic/\t in {0/green/\faCheckCircle/{No Node.js, nothing to build}, 4.9/blue/\faLock/{Nothing installed system-wide}, 9.8/orange/\faCube/{A model included: works on day one}} {
+      \node[fill=\c BG, text=\c T, rounded corners=8pt, minimum width=4.6cm, minimum height=0.62cm, font=\scriptsize\bfseries] at (\x,0) {\ic\ \t};
+    }
+  \end{tikzpicture}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{Your model in the platform}
-  \vspace{0.6em}
   \centering
-  \begin{tikzpicture}[node distance=1.1cm]
-    \node[box=blue, text width=3.0cm] (a) {\faLaptop\ Notebook \S 11\\[-1pt]\textnormal{\tiny \texttt{export\_for\_platform()}}};
-    \node[box=orange, text width=3.0cm, right=of a] (b) {\faFile\ \texttt{platform\_model.pt}\\[-1pt]\textnormal{\tiny TorchScript + a .json with name and metrics}};
-    \node[box=green, text width=3.0cm, right=of b] (c) {\faUpload\ Settings $\rightarrow$ Model\\[-1pt]\textnormal{\tiny upload; it loads at once}};
-    \draw[arr] (a) -- node[above, font=\tiny, text=muted]{download} (b); \draw[arr] (b) -- (c);
+  \vspace{0.3em}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    % ── three steps ────────────────────────────────────────────────────────
+    \foreach \x/\c/\ic/\t/\d in {0/blue/\faLaptop/Export/{\S 11 \texttt{export\_for\_platform()}},
+                                 4.6/orange/\faDownload/Download/{\texttt{platform\_model.pt}\\+ a \texttt{.json}: name, test metrics},
+                                 9.2/green/\faUpload/Upload/{Settings $\rightarrow$ Model\\loads at once, no restart}} {
+      \fill[\c BG] (\x,0) circle (0.62);
+      \draw[\c Line, line width=0.9pt] (\x,0) circle (0.62);
+      \node[font=\LARGE, text=\c T] at (\x,0) {\ic};
+      \node[font=\small\bfseries, text=\c T] at (\x,-0.95) {\t};
+      \node[font=\scriptsize, text=grayT, align=center, text width=3.6cm, anchor=north] at (\x,-1.2) {\d};
+    }
+    \draw[arr, line width=0.9pt] (0.85,0) -- node[above, font=\tiny, text=muted] {in Colab} (3.75,0);
+    \draw[arr, line width=0.9pt] (5.45,0) -- node[above, font=\tiny, text=muted] {on your laptop} (8.35,0);
   \end{tikzpicture}
 
   \vspace{1.0em}
-  \begin{columns}[T]
-    \begin{column}{0.46\textwidth}
-      \panel{blue}{Why TorchScript}{It stores the \textbf{compiled network}: the file loads on any computer with PyTorch,
-      whatever the Python version, without the notebook's class code.}
-    \end{column}
-    \begin{column}{0.46\textwidth}
-      \panel{orange}{Why not the notebook checkpoint}{\texttt{save\_model} (dill) stores the student's classes as Python
-      bytecode: a Colab file (Python 3.13) fails on a laptop with 3.11. Good for resuming, not for shipping.}
-    \end{column}
-  \end{columns}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \fill[greenBG, rounded corners=6pt] (0,0) rectangle (6.3,1.75);
+    \fill[redBG, rounded corners=6pt] (6.7,0) rectangle (13.0,1.75);
+    \node[anchor=north west, text width=5.9cm, align=left] at (0.2,1.6) {%
+      {\color{greenT}\bfseries\faCheck\ For the platform: TorchScript}\\[3pt]
+      {\footnotesize the \textbf{compiled network}: loads anywhere with PyTorch, no notebook code}};
+    \node[anchor=north west, text width=5.9cm, align=left] at (6.9,1.6) {%
+      {\color{redT}\bfseries\faTimes\ Not the notebook checkpoint}\\[3pt]
+      {\footnotesize \texttt{save\_model} (dill) needs the \textbf{same Python version}: fine for resuming, not for shipping}};
+  \end{tikzpicture}
 
-  \vspace{0.4em}
-  {\small\color{muted}The platform accepts any model that maps $(B,1,256,256)$ in $[0,1]$ to 3-class logits $(B,3,256,256)$.}
+  \vspace{0.9em}
+  {\footnotesize\color{grayT} Any model works if it maps
+  \tikz[baseline=-0.6ex]\node[draw=blueLine, fill=blueBG, rounded corners=2pt, inner sep=2.5pt, font=\scriptsize\ttfamily]{(B,1,256,256) photo in [0,1]};
+  \,$\rightarrow$\,
+  \tikz[baseline=-0.6ex]\node[draw=greenLine, fill=greenBG, rounded corners=2pt, inner sep=2.5pt, font=\scriptsize\ttfamily]{(B,3,256,256) class logits};}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════
 \begin{frame}{In one picture}
-  \vspace{1.2em}
-  \centering
-  \begin{tikzpicture}[node distance=0.9cm]
-    \node[box=blue, text width=3.2cm, minimum height=1.6cm] (nb) {\faLaptop\ Notebook\\[-1pt]\textnormal{\tiny dataset, U-Net, heads,\\receptive field, transfer learning}};
-    \node[box=orange, text width=3.2cm, minimum height=1.6cm, right=of nb] (m) {\faFile\ Model file\\[-1pt]\textnormal{\tiny TorchScript,\\3-class logits}};
-    \node[box=green, text width=3.2cm, minimum height=1.6cm, right=of m] (p) {\faIndustry\ Platform\\[-1pt]\textnormal{\tiny inspect, review, lots,\\dashboard, what-if}};
-    \draw[arr=accent, <->] (nb) -- (m); \draw[arr=accent, <->] (m) -- (p);
-  \end{tikzpicture}
+  \begin{columns}[c]
+    \begin{column}{0.36\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{inspector.pdf}
+    \end{column}
+    \begin{column}{0.60\textwidth}
+      {\large\bfseries You were hired as inspectors.\\[2pt]
+      Now you have \color{accent}built one.}
 
-  \vspace{1.3em}
-  {\large A camera and a U-Net that \textbf{mark the usable surface}, \textbf{decide sell or recycle},\\[2pt]
-  and \textbf{hand the hard cases to a person} --- built by the students, run by the warehouse.}
+      \vspace{1.0em}
+      \begin{tikzpicture}[x=1cm, y=1cm]
+        \foreach \x/\c/\ic/\t/\d in {0/blue/\faLaptop/Notebook/{dataset, U-Net,\\decision heads},
+                                     2.75/orange/\faFileO/Model file/{\texttt{platform\_model.pt}},
+                                     5.5/green/\faIndustry/Platform/{inspect, review,\\dashboard}} {
+          \fill[\c BG] (\x,0) circle (0.5);
+          \draw[\c Line, line width=0.8pt] (\x,0) circle (0.5);
+          \node[font=\Large, text=\c T] at (\x,0) {\ic};
+          \node[font=\footnotesize\bfseries, text=\c T] at (\x,-0.78) {\t};
+          \node[font=\tiny, text=grayT, align=center, anchor=north] at (\x,-0.98) {\d};
+        }
+        \draw[arr, line width=0.8pt] (0.62,0) -- (2.13,0);
+        \draw[arr, line width=0.8pt] (3.37,0) -- (4.88,0);
+      \end{tikzpicture}
 
-  \vspace{1.3em}
-  {\small Notebook: \texttt{week3/project1/notebook.ipynb} \quad$\bullet$\quad Platform: double-click \texttt{start-windows.bat} / \texttt{start-mac.command} $\rightarrow$ {\color{accent}\texttt{localhost:8000}}}
+      \vspace{0.8em}
+      {\small A U-Net that \textbf{marks the usable surface}, \textbf{decides sell or recycle}
+      and \textbf{hands the hard cases to a person}.}
+
+      \vspace{0.9em}
+      \begin{tikzpicture}
+        \node[fill=blueBG, text=blueT, rounded corners=6pt, inner sep=4pt, font=\scriptsize\bfseries, anchor=west] at (0,0)
+          {\faBook\ \texttt{notebook.ipynb} in Colab};
+        \node[fill=greenBG, text=greenT, rounded corners=6pt, inner sep=4pt, font=\scriptsize\bfseries, anchor=west] at (0,-0.6)
+          {\faMousePointer\ double-click \texttt{start-…} $\rightarrow$ \texttt{localhost:8000}};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 % ════════════════════════════════════════════════════════════════════════════

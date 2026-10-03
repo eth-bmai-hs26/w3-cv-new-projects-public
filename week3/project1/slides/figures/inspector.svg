@@ -1,0 +1,321 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Tile inspector at the inspection line. Source for inspector.pdf (slide 2).
+       Rebuild: python3 -c "import cairosvg; cairosvg.svg2pdf(url='inspector.svg', write_to='inspector.pdf')" -->
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9eef5"/><stop offset="1" stop-color="#cdd6e1"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#aeb6c0"/><stop offset="1" stop-color="#8a939e"/>
+    </linearGradient>
+    <linearGradient id="hat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f9bff"/><stop offset="0.55" stop-color="#2468d6"/><stop offset="1" stop-color="#173f8f"/>
+    </linearGradient>
+    <linearGradient id="brim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a6fdb"/><stop offset="1" stop-color="#16408f"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f3c9a6"/><stop offset="0.6" stop-color="#eab58e"/><stop offset="1" stop-color="#d49a72"/>
+    </linearGradient>
+    <linearGradient id="jacket" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#626c78"/><stop offset="1" stop-color="#363d46"/>
+    </linearGradient>
+    <linearGradient id="sleeve" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a646f"/><stop offset="1" stop-color="#3a414a"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fe0ff" stop-opacity="0.75"/><stop offset="1" stop-color="#2f6fb5" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2f4f6"/><stop offset="0.5" stop-color="#a9b0b8"/><stop offset="1" stop-color="#6d747c"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c98d55"/><stop offset="1" stop-color="#8f5a2c"/>
+    </linearGradient>
+    <linearGradient id="belt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4e55"/><stop offset="1" stop-color="#2b2e33"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9aa4b0"/><stop offset="1" stop-color="#5d6672"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd3ff" stop-opacity="0.05"/><stop offset="1" stop-color="#8fd3ff" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="marble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7f5f0"/><stop offset="1" stop-color="#dcd8cf"/>
+    </linearGradient>
+    <linearGradient id="terracotta" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d98a5f"/><stop offset="1" stop-color="#b0623c"/>
+    </linearGradient>
+    <linearGradient id="slate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8d949c"/><stop offset="1" stop-color="#646b73"/>
+    </linearGradient>
+    <linearGradient id="glove" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a3f46"/><stop offset="1" stop-color="#1c1f23"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.9"/>
+    </radialGradient>
+    <clipPath id="sceneClip"><rect x="0" y="0" width="800" height="600" rx="28"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#sceneClip)">
+  <!-- ═══ background: warehouse ═══ -->
+  <rect width="800" height="600" fill="url(#wall)"/>
+
+  <!-- pallet racking, pushed back with a haze -->
+  <g opacity="0.55">
+    <g fill="#7d8a9c">
+      <rect x="20" y="60" width="9" height="370"/><rect x="250" y="60" width="9" height="370"/>
+      <rect x="480" y="60" width="9" height="370"/><rect x="710" y="60" width="9" height="370"/>
+    </g>
+    <g fill="#e07b39">
+      <rect x="20" y="150" width="699" height="9"/><rect x="20" y="262" width="699" height="9"/>
+      <rect x="20" y="372" width="699" height="9"/>
+    </g>
+    <g fill="#c9a37a" stroke="#a9845e" stroke-width="2">
+      <rect x="45" y="96" width="70" height="54"/><rect x="120" y="112" width="52" height="38"/><rect x="178" y="90" width="62" height="60"/>
+      <rect x="275" y="104" width="80" height="46"/><rect x="362" y="92" width="56" height="58"/>
+      <rect x="505" y="100" width="66" height="50"/><rect x="578" y="116" width="44" height="34"/><rect x="630" y="94" width="70" height="56"/>
+      <rect x="40" y="206" width="84" height="56"/><rect x="132" y="218" width="58" height="44"/>
+      <rect x="270" y="212" width="64" height="50"/><rect x="340" y="200" width="70" height="62"/><rect x="416" y="226" width="52" height="36"/>
+      <rect x="500" y="210" width="76" height="52"/><rect x="640" y="204" width="62" height="58"/>
+      <rect x="48" y="320" width="66" height="52"/><rect x="290" y="326" width="90" height="46"/><rect x="560" y="316" width="70" height="56"/>
+    </g>
+    <g stroke="#a9845e" stroke-width="2" fill="none">
+      <path d="M80 96v54M209 90v60M315 104v46M538 100v50M665 94v56M82 206v56M375 200v62M538 210v52M671 204v58"/>
+    </g>
+  </g>
+  <rect width="800" height="440" fill="#e6ecf3" opacity="0.45"/>
+
+  <!-- ceiling lamps -->
+  <g>
+    <path d="M90 0h70l-8 18h-54z" fill="#59626e"/><path d="M98 18h54l120 260h-294z" fill="url(#beam)" opacity="0.35"/>
+    <path d="M610 0h70l-8 18h-54z" fill="#59626e"/><path d="M618 18h54l120 260h-294z" fill="url(#beam)" opacity="0.35"/>
+  </g>
+
+  <!-- floor -->
+  <rect y="430" width="800" height="170" fill="url(#floor)"/>
+  <rect y="430" width="800" height="4" fill="#7b8490"/>
+  <g>
+    <rect y="560" width="800" height="16" fill="#f2c230"/>
+    <g fill="#2b2e33">
+      <path d="M0 560h16l-16 16z"/><path d="M28 576l16-16h20l-16 16z"/><path d="M92 576l16-16h20l-16 16z"/>
+      <path d="M156 576l16-16h20l-16 16z"/><path d="M220 576l16-16h20l-16 16z"/><path d="M284 576l16-16h20l-16 16z"/>
+      <path d="M348 576l16-16h20l-16 16z"/><path d="M412 576l16-16h20l-16 16z"/><path d="M476 576l16-16h20l-16 16z"/>
+      <path d="M540 576l16-16h20l-16 16z"/><path d="M604 576l16-16h20l-16 16z"/><path d="M668 576l16-16h20l-16 16z"/>
+      <path d="M732 576l16-16h20l-16 16z"/><path d="M796 576l4-4v4z"/>
+    </g>
+  </g>
+
+  <!-- ═══ conveyor + camera station ═══ -->
+  <!-- legs -->
+  <g fill="url(#frame)">
+    <rect x="40" y="410" width="12" height="105"/><rect x="330" y="410" width="12" height="105"/>
+    <rect x="740" y="410" width="12" height="105"/>
+  </g>
+  <ellipse cx="46" cy="516" rx="16" ry="4" fill="#000" opacity="0.15"/>
+  <ellipse cx="336" cy="516" rx="16" ry="4" fill="#000" opacity="0.15"/>
+  <ellipse cx="746" cy="516" rx="16" ry="4" fill="#000" opacity="0.15"/>
+  <!-- belt -->
+  <path d="M-10 380h820v14h-820z" fill="#5d636b"/>
+  <rect x="-10" y="394" width="820" height="20" fill="url(#belt)"/>
+  <rect x="-10" y="412" width="820" height="5" fill="#80878f"/>
+  <g fill="#9aa2ab" stroke="#5b626a" stroke-width="1.5">
+    <circle cx="20" cy="404" r="6"/><circle cx="80" cy="404" r="6"/><circle cx="140" cy="404" r="6"/><circle cx="200" cy="404" r="6"/>
+    <circle cx="260" cy="404" r="6"/><circle cx="320" cy="404" r="6"/><circle cx="380" cy="404" r="6"/><circle cx="440" cy="404" r="6"/>
+    <circle cx="500" cy="404" r="6"/><circle cx="560" cy="404" r="6"/><circle cx="620" cy="404" r="6"/><circle cx="680" cy="404" r="6"/>
+    <circle cx="740" cy="404" r="6"/><circle cx="790" cy="404" r="6"/>
+  </g>
+
+  <!-- tiles on the belt (top face + thin front edge) -->
+  <!-- marble, approved -->
+  <g>
+    <path d="M28 380l12-14h86l-12 14z" fill="url(#marble)" stroke="#b9b3a6" stroke-width="1.2"/>
+    <path d="M28 380h86v5h-86z" fill="#c8c2b5"/>
+    <path d="M52 368q14 6 22 2t26 6" stroke="#b8b3a8" stroke-width="1.2" fill="none"/>
+  </g>
+  <!-- slate under the camera, cracked: crack highlighted by the model -->
+  <g>
+    <path d="M172 380l12-14h92l-12 14z" fill="url(#slate)" stroke="#50565d" stroke-width="1.2"/>
+    <path d="M172 380h92v5h-92z" fill="#4c5258"/>
+    <path d="M206 366l-4 5l8 3l-6 6" stroke="#e5484d" stroke-width="7" fill="none" opacity="0.55" stroke-linejoin="round"/>
+    <path d="M206 366l-4 5l8 3l-6 6" stroke="#1d1f22" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+  </g>
+  <!-- terracotta, approved, partly behind the inspector -->
+  <g>
+    <path d="M318 380l12-14h86l-12 14z" fill="url(#terracotta)" stroke="#8d4c2c" stroke-width="1.2"/>
+    <path d="M318 380h86v5h-86z" fill="#96512f"/>
+  </g>
+  <!-- marble on the far right -->
+  <g>
+    <path d="M700 380l12-14h86l-12 14z" fill="url(#marble)" stroke="#b9b3a6" stroke-width="1.2"/>
+    <path d="M700 380h86v5h-86z" fill="#c8c2b5"/>
+  </g>
+
+  <!-- camera gantry -->
+  <g>
+    <rect x="160" y="150" width="11" height="232" fill="url(#frame)"/>
+    <rect x="270" y="150" width="11" height="232" fill="url(#frame)"/>
+    <rect x="152" y="140" width="137" height="16" rx="3" fill="#6b7480"/>
+    <rect x="152" y="140" width="137" height="5" rx="2" fill="#8e98a4"/>
+    <path d="M208 196h26l38 170h-102z" fill="url(#scan)"/>
+    <rect x="196" y="156" width="50" height="34" rx="6" fill="#2f343a"/>
+    <rect x="200" y="160" width="20" height="6" rx="2" fill="#4c535b"/>
+    <circle cx="238" cy="166" r="3" fill="#3ddc84"/>
+    <rect x="207" y="188" width="28" height="10" rx="3" fill="#1d2024"/>
+    <ellipse cx="221" cy="198" rx="10" ry="3" fill="#7fd0ff"/>
+  </g>
+  <!-- model verdict bubble -->
+  <g>
+    <path d="M118 300l84 62l-60 -62" fill="#ffffff" stroke="#e1a3a3" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="22" y="250" width="124" height="56" rx="10" fill="#ffffff" stroke="#e1a3a3" stroke-width="2"/>
+    <path d="M120 304.5h21" stroke="#ffffff" stroke-width="3"/>
+    <text x="84" y="274" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="bold" fill="#a52323" text-anchor="middle">72 % usable</text>
+    <text x="84" y="295" font-family="DejaVu Sans, sans-serif" font-size="13" font-weight="bold" fill="#a52323" text-anchor="middle">✗ REJECT</text>
+  </g>
+
+  <!-- soft shadow behind the inspector -->
+  <ellipse cx="560" cy="600" rx="210" ry="40" fill="#000" opacity="0.12"/>
+
+  <!-- ═══ the inspector ═══ -->
+  <!-- torso -->
+  <path d="M392 600 L398 440 C402 380 440 352 492 340 L534 330 L560 356 L586 330 L628 340 C680 352 718 380 722 440 L728 600 Z" fill="url(#jacket)"/>
+  <!-- t-shirt in the collar -->
+  <path d="M534 330 L560 356 L586 330 L578 324 L560 342 L542 324 Z" fill="#2c4f86"/>
+  <!-- neck -->
+  <path d="M532 290 h56 v36 l-28 22 l-28 -22 z" fill="#d79c74"/>
+  <path d="M532 300 q28 18 56 0 v8 q-28 18 -56 0z" fill="#c4876088"/>
+  <!-- collar flaps -->
+  <path d="M528 318 L560 356 L542 384 L506 336 Z" fill="#4c555f" stroke="#2c3238" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M592 318 L560 356 L578 384 L614 336 Z" fill="#545e69" stroke="#2c3238" stroke-width="2" stroke-linejoin="round"/>
+  <!-- zipper -->
+  <path d="M560 356 V600" stroke="#2a2f35" stroke-width="4"/>
+  <path d="M560 356 V600" stroke="#9aa3ad" stroke-width="1.4" stroke-dasharray="3 4"/>
+  <!-- reflective stripes -->
+  <g>
+    <path d="M400 470 H556 V490 H399 Z" fill="#d7dde3"/><path d="M564 470 H720 L721 490 H564 Z" fill="#d7dde3"/>
+    <path d="M400 470 H556 V474 H400 Z M564 470 H720 V474 H564 Z" fill="#ffffff"/>
+    <path d="M399 486 H556 V490 H399 Z M564 486 H721 V490 H564 Z" fill="#b7c0c9"/>
+  </g>
+  <!-- chest pocket -->
+  <path d="M590 396 h44 v40 h-44 z" fill="none"/>
+  <!-- seams where the sleeves meet the body -->
+  <path d="M470 352 C452 380 446 420 450 470" stroke="#2c3238" stroke-width="2.2" fill="none" opacity="0.6"/>
+  <path d="M650 352 C668 380 674 420 670 470" stroke="#2c3238" stroke-width="2.2" fill="none" opacity="0.6"/>
+  <!-- chest patch -->
+  <circle cx="630" cy="402" r="17" fill="#f08a24" stroke="#ffffff" stroke-width="3"/>
+  <path d="M621 402l9 -9l9 9l-9 9z" fill="#ffffff"/>
+  <path d="M628 397l3 4l-3 3l4 4" stroke="#f08a24" stroke-width="1.6" fill="none"/>
+  <!-- name tag -->
+  <rect x="604" y="434" width="52" height="16" rx="3" fill="#e9edf1" stroke="#b7c0c9"/>
+  <text x="630" y="445.5" font-family="DejaVu Sans, sans-serif" font-size="8.5" font-weight="bold" fill="#2c3238" text-anchor="middle">INSPECTOR</text>
+
+  <!-- left arm (viewer's left) holding the clipboard -->
+  <path d="M452 372 C448 420 450 470 470 520 L470 540 L430 556 Z" fill="#000" opacity="0.18"/>
+  <path d="M470 352 C420 372 398 420 400 480 C402 520 412 548 440 552 C468 556 478 532 470 508 L452 470 C448 440 456 400 482 372 Z" fill="url(#sleeve)" stroke="#262b31" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M424 390 C418 404 414 420 412 436" stroke="#7b8592" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M404 500 C405 520 410 540 425 548" stroke="#2c3238" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M402 462 L452 462 L455 478 L402 480 Z" fill="#d7dde3"/>
+
+  <!-- clipboard -->
+  <g transform="rotate(-9 510 480)">
+    <rect x="440" y="392" width="148" height="186" rx="10" fill="url(#board)"/>
+    <rect x="440" y="392" width="148" height="186" rx="10" fill="none" stroke="#7a4a22" stroke-width="2"/>
+    <rect x="452" y="414" width="124" height="156" rx="3" fill="#fbfbf8"/>
+    <rect x="452" y="414" width="124" height="156" rx="3" fill="none" stroke="#d9d6cc" stroke-width="1.2"/>
+    <rect x="490" y="382" width="48" height="24" rx="5" fill="url(#metal)" stroke="#5f666e" stroke-width="1.5"/>
+    <circle cx="514" cy="390" r="4" fill="#5f666e"/>
+    <text x="464" y="436" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="bold" fill="#2c3238">TILE CHECK</text>
+    <path d="M464 442 H564" stroke="#2368d0" stroke-width="2"/>
+    <!-- row 1: ok -->
+    <rect x="464" y="452" width="22" height="22" rx="2" fill="url(#marble)" stroke="#b9b3a6"/>
+    <path d="M494 460 H540 M494 467 H528" stroke="#c4c8cd" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M548 463 l5 6 l11 -13" stroke="#1e8a3c" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- row 2: cracked -->
+    <rect x="464" y="484" width="22" height="22" rx="2" fill="url(#slate)" stroke="#50565d"/>
+    <path d="M472 484 l-3 7 l7 4 l-4 11" stroke="#e5484d" stroke-width="1.8" fill="none"/>
+    <path d="M494 492 H540 M494 499 H522" stroke="#c4c8cd" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M550 489 l12 12 M562 489 l-12 12" stroke="#c22f2f" stroke-width="3.2" stroke-linecap="round"/>
+    <!-- row 3: in progress -->
+    <rect x="464" y="516" width="22" height="22" rx="2" fill="url(#terracotta)" stroke="#8d4c2c"/>
+    <path d="M494 524 H540 M494 531 H516" stroke="#c4c8cd" stroke-width="2.5" stroke-linecap="round"/>
+    <rect x="548" y="519" width="16" height="16" rx="2" fill="none" stroke="#9aa1a8" stroke-width="2"/>
+  </g>
+
+  <!-- left glove gripping the board edge -->
+  <path d="M432 470 C424 482 424 506 434 520 C444 530 462 526 466 512 L468 488 C466 474 448 462 432 470 Z" fill="url(#glove)"/>
+  <path d="M452 482 q10 2 14 8 M452 496 q10 2 14 8" stroke="#555c64" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- right arm (viewer's right) writing with a pen -->
+  <path d="M668 372 C672 420 670 470 650 506 L604 508 L640 540 L700 540 Z" fill="#000" opacity="0.18"/>
+  <path d="M650 352 C700 372 724 420 722 480 C720 522 700 546 664 548 L600 540 C584 536 584 512 600 508 L650 508 C664 506 670 480 664 450 C658 410 640 384 628 368 Z" fill="url(#sleeve)" stroke="#262b31" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M690 386 C700 400 706 416 708 432" stroke="#7b8592" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M716 470 C716 505 704 530 680 540" stroke="#2c3238" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M664 462 L722 462 L721 480 L667 480 Z" fill="#d7dde3"/>
+  <path d="M606 508 L612 544" stroke="#d7dde3" stroke-width="10"/>
+  <!-- pen -->
+  <path d="M556 500 L604 516" stroke="#1a56b8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M548 497 L557 500" stroke="#2c3238" stroke-width="4" stroke-linecap="round"/>
+  <!-- right glove -->
+  <path d="M578 512 C572 500 584 490 598 494 L620 500 C634 504 636 524 624 532 L596 536 C584 536 578 526 578 512 Z" fill="url(#glove)"/>
+  <path d="M586 504 q8 -3 14 0" stroke="#555c64" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- head -->
+  <g transform="translate(560 330) scale(1.1) translate(-560 -330)">
+  <!-- ears -->
+  <ellipse cx="502" cy="236" rx="11" ry="19" fill="#e2a982"/>
+  <ellipse cx="618" cy="236" rx="11" ry="19" fill="#d49a72"/>
+  <path d="M500 228 q6 8 0 16" stroke="#c4876a" stroke-width="2" fill="none"/>
+  <path d="M620 228 q-6 8 0 16" stroke="#b97c58" stroke-width="2" fill="none"/>
+  <!-- orange earplugs -->
+  <circle cx="502" cy="240" r="4.5" fill="#f08a24"/>
+  <circle cx="618" cy="240" r="4.5" fill="#f08a24"/>
+  <!-- face -->
+  <path d="M506 190 C504 250 514 296 560 314 C606 296 616 250 614 190 Z" fill="url(#skin)"/>
+  <!-- shadow under the hat brim -->
+  <path d="M506 196 Q560 186 614 196 L614 210 Q560 198 506 210 Z" fill="#b97f5a" opacity="0.45"/>
+  <!-- eyebrows -->
+  <path d="M520 214 Q536 206 552 213" stroke="#3f2b1f" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M568 213 Q584 206 600 214" stroke="#3f2b1f" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <!-- eyes (behind the glasses) -->
+  <ellipse cx="537" cy="236" rx="6" ry="6.5" fill="#2a1d15"/>
+  <ellipse cx="583" cy="236" rx="6" ry="6.5" fill="#2a1d15"/>
+  <circle cx="539" cy="234" r="2" fill="#ffffff"/><circle cx="585" cy="234" r="2" fill="#ffffff"/>
+  <!-- nose -->
+  <path d="M560 240 C556 254 551 262 552 268 C556 274 566 274 570 268" stroke="#b97c58" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M554 268 q6 4 12 0" fill="#d0926a"/>
+  <!-- beard -->
+  <path d="M506 236 C506 280 526 324 560 330 C594 324 614 280 614 236 C608 258 600 266 590 268 C580 262 570 260 560 264 C550 260 540 262 530 268 C520 266 512 258 506 236 Z" fill="#4a3326"/>
+  <path d="M520 284 q4 12 12 20 M536 296 q4 12 10 18 M600 284 q-4 12 -12 20 M584 296 q-4 12 -10 18 M560 306 v16" stroke="#5f4434" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <!-- moustache -->
+  <path d="M530 280 C540 268 554 270 560 276 C566 270 580 268 590 280 C580 284 568 284 560 280 C552 284 540 284 530 280 Z" fill="#3a271c"/>
+  <!-- mouth -->
+  <path d="M546 290 Q560 302 574 290 Q560 296 546 290 Z" fill="#a8564b"/>
+  <path d="M549 291 Q560 296 571 291" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- safety glasses: wraparound lens, top frame, temples, glints -->
+  <path d="M504 224 L512 220 Q560 212 608 220 L616 224 L614 238 Q612 254 594 256 Q574 258 566 246 Q560 238 554 246 Q546 258 526 256 Q508 254 506 238 Z" fill="url(#lens)" stroke="#1f2329" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M504 224 L512 220 Q560 212 608 220 L616 224 L616 228 Q560 218 504 228 Z" fill="#1f2329"/>
+  <path d="M496 230 L506 226 M624 230 L614 226" stroke="#1f2329" stroke-width="4" stroke-linecap="round"/>
+  <path d="M516 230 L528 248" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" opacity="0.75"/>
+  <path d="M524 228 L530 236" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M572 230 L584 248" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" opacity="0.75"/>
+  <path d="M580 228 L586 236" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- hard hat -->
+  <path d="M486 196 C484 132 520 98 560 98 C600 98 636 132 634 196 Z" fill="url(#hat)"/>
+  <path d="M548 100 C546 130 546 165 548 196 L572 196 C574 165 574 130 572 100 Q560 96 548 100 Z" fill="#3b86f0"/>
+  <path d="M548 100 C546 130 546 165 548 196" stroke="#1a4fa8" stroke-width="2" fill="none"/>
+  <path d="M572 100 C574 130 574 165 572 196" stroke="#1a4fa8" stroke-width="2" fill="none"/>
+  <path d="M500 168 C500 136 516 114 536 106 C522 122 514 142 514 170 Z" fill="#ffffff" opacity="0.35"/>
+  <path d="M464 198 Q560 176 656 198 Q662 210 648 212 Q560 192 472 212 Q458 210 464 198 Z" fill="url(#brim)"/>
+  <path d="M470 200 Q560 180 650 200" stroke="#6fb0ff" stroke-width="2" fill="none" opacity="0.7"/>
+  <!-- hat sticker: a tile with a check -->
+  <rect x="590" y="140" width="24" height="24" rx="4" fill="#ffffff" transform="rotate(12 602 152)"/>
+  <path d="M594 152 l5 6 l11 -12" stroke="#1e8a3c" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="rotate(12 602 152)"/>
+  </g>
+  </g>
+</svg>
